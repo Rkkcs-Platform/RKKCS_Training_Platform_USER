@@ -7,7 +7,17 @@
     <title>Rkkcs - Checking System</title>
   </head>
   <body>
-    <div id="app"></div>
+    <div id="app">
+      <style>
+        #app:empty::after {
+          content: 'Đang tải...';
+          display: block;
+          padding: 24px;
+          font-family: system-ui, sans-serif;
+          color: #666;
+        }
+      </style>
+    </div>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>
