@@ -4,10 +4,20 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>rkkcs-training-platform-user</title>
+    <title>Brain Training</title>
   </head>
   <body>
-    <div id="app"></div>
+    <div id="app">
+      <style>
+        #app:empty::after {
+          content: 'Đang tải...';
+          display: block;
+          padding: 24px;
+          font-family: system-ui, sans-serif;
+          color: #666;
+        }
+      </style>
+    </div>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>
