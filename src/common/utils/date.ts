@@ -1,7 +1,8 @@
 import { format, isValid } from 'date-fns'
 
 export function formatDisplayDate(date: string) {
-  const parsed = new Date(`${date}T00:00:00`)
+  const normalized = date.includes('T') ? date : `${date}T00:00:00`
+  const parsed = new Date(normalized)
   if (!isValid(parsed)) return date
   return format(parsed, 'dd/MM/yyyy')
 }

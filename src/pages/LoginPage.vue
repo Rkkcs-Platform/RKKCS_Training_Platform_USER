@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { APP_LABELS } from '@/common/constants/messages'
 import {
   getErrorMessage,
   showLoginFailed,
@@ -49,7 +50,7 @@ async function handleSubmit() {
       return
     }
 
-    await router.replace({ name: 'challenge' })
+    await router.replace({ name: 'dashboard' })
   } catch (error) {
     showLoginFailed(getErrorMessage(error))
   } finally {
@@ -63,13 +64,13 @@ async function handleSubmit() {
     <div class="w-full max-w-md space-y-6">
       <div class="text-center">
         <p class="text-xs font-medium uppercase tracking-[0.25em] text-primary">
-          RKKCS
+          {{ APP_LABELS.brandShort }}
         </p>
         <h1 class="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">
-          Brain Training
+          {{ APP_LABELS.appName }}
         </h1>
         <p class="mt-2 text-sm text-muted-foreground sm:text-base">
-          Đăng nhập để nhập mã hằng ngày
+          Đăng nhập để quản lý vận hành shop
         </p>
       </div>
 
@@ -99,7 +100,7 @@ async function handleSubmit() {
                 v-model="password"
                 type="password"
                 autocomplete="current-password"
-                placeholder="••••••"
+                placeholder="Password"
                 class="h-11"
               />
             </div>
