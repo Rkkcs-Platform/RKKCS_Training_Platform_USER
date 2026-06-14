@@ -1,67 +1,38 @@
 <script setup lang="ts">
-import { LogOut } from 'lucide-vue-next'
-import { RouterLink, RouterView, useRoute, useRouter } from 'vue-router'
-import { Button } from '@/components/ui/button'
-import { showLogoutSuccess } from '@/common'
-import { cn } from '@/lib/utils'
-import { useAuthStore } from '@/stores/auth'
-
-const authStore = useAuthStore()
-const router = useRouter()
-const route = useRoute()
-
-const tabs = [
-  { label: 'Nhập mã', name: 'challenge' },
-  { label: 'Lịch sử', name: 'history' },
-]
-
-async function handleLogout() {
-  await authStore.logout()
-  showLogoutSuccess()
-  router.push({ name: 'login' })
-}
+import { ref } from 'vue'
+import { RouterView } from 'vue-router'
+import AppBottomNav from '@/components/layout/AppBottomNav.vue'
+import AppHeader from '@/components/layout/AppHeader.vue'
+import AppSidebar from '@/components/layout/AppSidebar.vue'
+import PageContainer from '@/components/layout/PageContainer.vue'
+const mobileSidebarOpen = ref(false)
 </script>
 
 <template>
-  <div class="min-h-svh bg-background">
-    <header class="sticky top-0 z-10 border-b bg-background/95 backdrop-blur">
-      <div class="mx-auto flex w-full max-w-3xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
-        <div class="min-w-0">
-          <p class="text-xs font-medium uppercase tracking-[0.2em] text-primary">
-            Brain Training
-          </p>
-          <p class="truncate text-sm font-semibold sm:text-base">
-            {{ authStore.user?.name }}
-          </p>
-        </div>
+  <div class="min-h-svh bg-muted/30">
+    <div
+      v-if="mobileSidebarOpen"
+      class="fixed inset-0 z-40 bg-black/40 lg:hidden"
+      @click="mobileSidebarOpen = false"
+    />
 
-        <Button variant="outline" size="sm" @click="handleLogout">
-          <LogOut class="size-4" />
-          <span class="hidden sm:inline">Đăng xuất</span>
-        </Button>
+    <div class="flex min-h-svh">
+      <AppSidebar
+        :open="mobileSidebarOpen"
+        @close="mobileSidebarOpen = false"
+      />
+
+      <div class="flex min-h-svh min-w-0 flex-1 flex-col">
+        <AppHeader show-menu-button @open-sidebar="mobileSidebarOpen = true" />
+
+        <main class="flex-1">
+          <PageContainer>
+            <RouterView />
+          </PageContainer>
+        </main>
+
+        <AppBottomNav />
       </div>
-
-      <div class="mx-auto grid w-full max-w-3xl grid-cols-2 gap-2 px-4 pb-3 sm:px-6">
-        <RouterLink
-          v-for="tab in tabs"
-          :key="tab.name"
-          :to="{ name: tab.name }"
-          :class="
-            cn(
-              'rounded-lg border px-3 py-2 text-center text-sm font-medium transition',
-              route.name === tab.name
-                ? 'border-primary bg-primary text-primary-foreground'
-                : 'border-border bg-background text-foreground hover:bg-muted',
-            )
-          "
-        >
-          {{ tab.label }}
-        </RouterLink>
-      </div>
-    </header>
-
-    <main class="mx-auto w-full max-w-3xl px-4 py-5 sm:px-6 sm:py-8">
-      <RouterView />
-    </main>
+    </div>
   </div>
 </template>

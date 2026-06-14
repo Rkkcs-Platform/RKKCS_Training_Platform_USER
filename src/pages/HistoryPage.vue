@@ -84,11 +84,11 @@ async function handleSelectDate(date: string) {
             <div class="flex items-center justify-between gap-2">
               <p class="font-semibold">{{ formatDisplayDate(item.date) }}</p>
               <Badge :variant="item.status === 'completed' ? 'default' : 'secondary'">
-                {{ item.status === 'completed' ? 'Xong' : 'Đang làm' }}
+                {{ item.status === 'completed' ? 'Hoàn thành' : 'Đang xử lý' }}
               </Badge>
             </div>
             <p class="mt-2 text-sm text-muted-foreground">
-              Đúng {{ item.correct }} · Sai {{ item.wrong }} · {{ item.accuracy }}%
+              Mã đúng {{ item.correct }} · Mã sai {{ item.wrong }} · {{ item.accuracy }}%
             </p>
           </button>
         </div>
@@ -124,7 +124,7 @@ async function handleSelectDate(date: string) {
                 <TableCell>{{ item.accuracy }}%</TableCell>
                 <TableCell>
                   <Badge :variant="item.status === 'completed' ? 'default' : 'secondary'">
-                    {{ item.status === 'completed' ? 'Hoàn thành' : 'Đang làm' }}
+                    {{ item.status === 'completed' ? 'Hoàn thành' : 'Thiếu mã' }}
                   </Badge>
                 </TableCell>
               </TableRow>
@@ -141,7 +141,7 @@ async function handleSelectDate(date: string) {
           Mã đã nhập — {{ formatDisplayDate(historyStore.selectedDate) }}
         </CardTitle>
         <CardDescription v-if="historyStore.detail">
-          {{ historyStore.detail.submitted }} mã · Đúng {{ historyStore.detail.correct }} · Sai
+          {{ historyStore.detail.submitted }} mã · Hợp lệ {{ historyStore.detail.correct }} · Không hợp lệ
           {{ historyStore.detail.wrong }}
         </CardDescription>
       </CardHeader>
@@ -173,7 +173,7 @@ async function handleSelectDate(date: string) {
               </p>
             </div>
             <Badge :variant="answer.isCorrect ? 'default' : 'destructive'">
-              {{ answer.isCorrect ? 'Đúng' : 'Sai' }}
+              {{ answer.isCorrect ? 'Hợp lệ' : 'không hợp lệ' }}
             </Badge>
           </div>
         </div>
@@ -199,7 +199,7 @@ async function handleSelectDate(date: string) {
                 </TableCell>
                 <TableCell>
                   <Badge :variant="answer.isCorrect ? 'default' : 'destructive'">
-                    {{ answer.isCorrect ? 'Đúng' : 'Sai' }}
+                    {{ answer.isCorrect ? 'Mã hợp lệ' : 'Không tìm thấy mã' }}
                   </Badge>
                 </TableCell>
                 <TableCell>{{ formatDisplayTime(answer.submittedAt) }}</TableCell>

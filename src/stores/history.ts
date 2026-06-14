@@ -18,7 +18,6 @@ export const useHistoryStore = defineStore('history', () => {
 
   async function loadHistory() {
     isLoadingList.value = true
-
     try {
       const data = await fetchSubmissionHistory()
       items.value = data.items ?? []

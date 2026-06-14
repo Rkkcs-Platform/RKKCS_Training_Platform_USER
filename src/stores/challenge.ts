@@ -2,14 +2,19 @@ import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import {
   fetchTodayChallenge,
+  fetchTodayResult,
   submitCodeRequest,
 } from '@/services/challenge.service'
 import type { TodayChallenge } from '@/types/challenge'
+import type { SubmissionDetail } from '@/types/submission'
 
 export const useChallengeStore = defineStore('challenge', () => {
   const today = ref<TodayChallenge | null>(null)
+  const todayResult = ref<SubmissionDetail | null>(null)
   const isLoading = ref(false)
+  const isLoadingResult = ref(false)
   const isSubmitting = ref(false)
+  const loadFailed = ref(false)
   const lastFeedback = ref<'correct' | 'wrong' | null>(null)
 
   const progressPercent = computed(() => {
@@ -23,11 +28,34 @@ export const useChallengeStore = defineStore('challenge', () => {
 
   async function loadToday() {
     isLoading.value = true
+    loadFailed.value = false
 
     try {
       today.value = await fetchTodayChallenge()
+
+      if (today.value.submitted > 0) {
+        await loadTodayResult()
+      } else {
+        todayResult.value = null
+      }
+    } catch {
+      loadFailed.value = true
+      today.value = null
+      throw new Error('load failed')
     } finally {
       isLoading.value = false
+    }
+  }
+
+  async function loadTodayResult() {
+    isLoadingResult.value = true
+
+    try {
+      todayResult.value = await fetchTodayResult()
+    } catch {
+      todayResult.value = null
+    } finally {
+      isLoadingResult.value = false
     }
   }
 
@@ -51,6 +79,8 @@ export const useChallengeStore = defineStore('challenge', () => {
         await loadToday()
       }
 
+      await loadTodayResult()
+
       return result
     } finally {
       isSubmitting.value = false
@@ -63,12 +93,16 @@ export const useChallengeStore = defineStore('challenge', () => {
 
   return {
     today,
+    todayResult,
     isLoading,
+    isLoadingResult,
     isSubmitting,
+    loadFailed,
     lastFeedback,
     progressPercent,
     isCompleted,
     loadToday,
+    loadTodayResult,
     submitCode,
     clearFeedback,
   }

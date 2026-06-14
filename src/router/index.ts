@@ -29,19 +29,84 @@ const router = createRouter({
       children: [
         {
           path: '',
-          name: 'challenge',
-          component: () => import('@/pages/ChallengePage.vue'),
+          name: 'dashboard',
+          component: () => import('@/pages/DashboardPage.vue'),
+        },
+        {
+          path: 'transactions',
+          name: 'transactions',
+          component: () => import('@/pages/TransactionPage.vue'),
+        },
+        {
+          path: 'orders',
+          name: 'orders',
+          component: () => import('@/pages/OrdersPage.vue'),
+        },
+        {
+          path: 'orders/:id',
+          name: 'order-detail',
+          component: () => import('@/pages/OrderDetailPage.vue'),
+        },
+        {
+          path: 'shipments',
+          name: 'shipments',
+          component: () => import('@/pages/ShipmentsPage.vue'),
+        },
+        {
+          path: 'shipments/:id',
+          name: 'shipment-detail',
+          component: () => import('@/pages/ShipmentDetailPage.vue'),
+        },
+        {
+          path: 'menu',
+          name: 'menu',
+          component: () => import('@/pages/MenuPage.vue'),
         },
         {
           path: 'history',
           name: 'history',
           component: () => import('@/pages/HistoryPage.vue'),
         },
+        {
+          path: 'statistics',
+          name: 'statistics',
+          component: () => import('@/pages/StatisticsPage.vue'),
+        },
+        {
+          path: 'customers',
+          name: 'customers',
+          component: () => import('@/pages/ComingSoonPage.vue'),
+        },
+        {
+          path: 'payments',
+          name: 'payments',
+          component: () => import('@/pages/ComingSoonPage.vue'),
+        },
+        {
+          path: 'news',
+          name: 'news',
+          component: () => import('@/pages/ComingSoonPage.vue'),
+        },
+        {
+          path: 'profile',
+          name: 'profile',
+          component: () => import('@/pages/ComingSoonPage.vue'),
+        },
+        {
+          path: 'settings',
+          name: 'settings',
+          component: () => import('@/pages/ComingSoonPage.vue'),
+        },
+        // Legacy redirect
+        {
+          path: 'challenge',
+          redirect: { name: 'transactions' },
+        },
       ],
     },
     {
       path: '/:pathMatch(.*)*',
-      redirect: { name: 'challenge' },
+      redirect: { name: 'dashboard' },
     },
   ],
 })
@@ -57,7 +122,7 @@ router.beforeEach((to) => {
   }
 
   if (routeIsGuestOnly(to) && authStore.isAuthenticated) {
-    return { name: 'challenge' }
+    return { name: 'dashboard' }
   }
 
   return true
