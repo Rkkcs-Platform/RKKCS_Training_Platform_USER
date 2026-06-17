@@ -52,15 +52,16 @@ function handleNavigate() {
 </script>
 
 <template>
-  <aside
-    :class="
-      cn(
-        'flex h-full w-72 shrink-0 flex-col border-r bg-background',
-        'fixed inset-y-0 left-0 z-50 transition-transform lg:static lg:z-auto lg:translate-x-0',
-        props.open ? 'translate-x-0' : '-translate-x-full',
-      )
-    "
-  >
+    <aside
+      :class="
+        cn(
+          'slider-nav-menu',
+          'flex h-svh w-72 shrink-0 flex-col border-r bg-background scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent',
+          'fixed inset-y-0 left-0 z-50 transition-transform lg:static lg:z-auto lg:translate-x-0',
+          props.open ? 'translate-x-0' : '-translate-x-full',
+        )
+      "
+    >
     <div class="border-b p-5">
       <p class="text-xs font-semibold uppercase tracking-[0.2em] text-primary">
         {{ APP_LABELS.brandShort }}

@@ -17,7 +17,7 @@ function isActive(name: string) {
 </script>
 
 <template>
-  <nav class="fixed inset-x-0 bottom-0 z-30 border-t bg-background/95 backdrop-blur lg:hidden">
+  <nav class="z-30 shrink-0 border-t bg-background/95 backdrop-blur lg:hidden">
     <div class="mx-auto grid max-w-lg grid-cols-5 px-2 pb-[env(safe-area-inset-bottom)] pt-1">
       <RouterLink
         v-for="item in BOTTOM_NAV_ITEMS"

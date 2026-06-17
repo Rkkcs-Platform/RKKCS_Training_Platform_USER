@@ -145,12 +145,12 @@ async function handleUpload() {
         title="1. Nhập mã giao dịch"
         description="Dán danh sách mã, mỗi mã một dòng. Hệ thống sẽ upload tuần tự."
       >
-        <textarea
+        <input
           v-model="codesInput"
-          rows="6"
+          type="text"
           placeholder="AVBCOMMN&#10;XYZ12345&#10;..."
           :disabled="challengeStore.isSubmitting"
-          class="min-h-36 w-full rounded-xl border bg-background px-4 py-3 font-mono text-sm uppercase tracking-widest outline-none ring-offset-background focus-visible:ring-2 focus-visible:ring-ring"
+          class="min-h-10 w-full rounded-xl border bg-background px-4 py-3 font-mono text-sm uppercase tracking-widest outline-none ring-offset-background focus-visible:ring-2 focus-visible:ring-ring"
         />
 
         <div class="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
