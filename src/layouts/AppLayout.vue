@@ -9,23 +9,23 @@ const mobileSidebarOpen = ref(false)
 </script>
 
 <template>
-  <div class="min-h-svh bg-muted/30">
+  <div class="h-svh overflow-hidden bg-muted/30">
     <div
       v-if="mobileSidebarOpen"
       class="fixed inset-0 z-40 bg-black/40 lg:hidden"
       @click="mobileSidebarOpen = false"
     />
 
-    <div class="flex min-h-svh">
+    <div class="flex h-full overflow-hidden">
       <AppSidebar
         :open="mobileSidebarOpen"
         @close="mobileSidebarOpen = false"
       />
 
-      <div class="flex min-h-svh min-w-0 flex-1 flex-col">
+      <div class="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
         <AppHeader show-menu-button @open-sidebar="mobileSidebarOpen = true" />
 
-        <main class="flex-1">
+        <main class="min-h-0 flex-1 overflow-y-auto">
           <PageContainer>
             <RouterView />
           </PageContainer>

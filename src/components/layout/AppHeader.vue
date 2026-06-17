@@ -23,7 +23,7 @@ const title = computed(() => {
 </script>
 
 <template>
-  <header class="sticky top-0 z-30 border-b bg-background/95 backdrop-blur">
+  <header class="z-30 shrink-0 border-b bg-background/95 backdrop-blur">
     <div class="flex h-14 items-center gap-3 px-4 lg:px-6">
       <Button
         v-if="showMenuButton"
