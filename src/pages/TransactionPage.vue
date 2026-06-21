@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
-import { CheckCircle2, Upload } from 'lucide-vue-next'
+import { CheckCircle2, Loader2, Upload } from 'lucide-vue-next'
 import {
   formatDisplayTime,
   showChallengeCompleted,
@@ -19,6 +19,7 @@ import { useChallengeStore } from '@/stores/challenge'
 const labels = PAGE_LABELS.challenge
 const challengeStore = useChallengeStore()
 const codesInput = ref('')
+const isUploading = ref(false)
 
 const parsedCodes = computed(() =>
   codesInput.value
@@ -49,18 +50,16 @@ onMounted(() => {
   void loadChallenge()
 })
 
-function clearInput() {
-  codesInput.value = ''
-}
-
 async function handleUpload() {
   if (
     !parsedCodes.value.length
     || challengeStore.isCompleted
-    || challengeStore.isSubmitting
+    || isUploading.value
   ) {
     return
   }
+
+  isUploading.value = true
 
   try {
     for (const code of parsedCodes.value) {
@@ -78,6 +77,8 @@ async function handleUpload() {
     codesInput.value = ''
   } catch (error) {
     showSubmitFailed(getErrorMessage(error))
+  } finally {
+    isUploading.value = false
   }
 }
 </script>
@@ -145,34 +146,33 @@ async function handleUpload() {
         title="1. Nhập mã giao dịch"
         description="Dán danh sách mã, mỗi mã một dòng. Hệ thống sẽ upload tuần tự."
       >
-        <input
-          v-model="codesInput"
-          type="text"
-          placeholder="AVBCOMMN&#10;XYZ12345&#10;..."
-          :disabled="challengeStore.isSubmitting"
-          class="min-h-10 w-full rounded-xl border bg-background px-4 py-3 font-mono text-sm uppercase tracking-widest outline-none ring-offset-background focus-visible:ring-2 focus-visible:ring-ring"
-        />
-
-        <div class="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <button
-            type="button"
-            class="text-sm font-medium text-primary hover:underline"
-            @click="clearInput"
-          >
-            Clear all
-          </button>
+        <div class="flex flex-row items-stretch gap-2 sm:flex-col sm:gap-4">
+          <input
+            v-model="codesInput"
+            type="text"
+            placeholder="AVBCOMMN&#10;XYZ12345&#10;..."
+            :disabled="isUploading"
+            class="min-h-11 min-w-0 flex-1 rounded-xl border-2 border-sky-300 bg-sky-50/40 px-2.5 py-2.5 font-mono text-xs uppercase tracking-wide shadow-sm outline-none transition-colors focus-visible:border-sky-500 focus-visible:ring-2 focus-visible:ring-sky-200/80 disabled:cursor-not-allowed disabled:border-input disabled:bg-muted disabled:opacity-60 sm:w-full sm:px-4 sm:py-3 sm:text-sm sm:tracking-widest"
+          />
 
           <Button
-            class="h-11 sm:min-w-44"
-            :disabled="!parsedCodes.length || challengeStore.isSubmitting"
+            variant="outline"
+            class="h-11 shrink-0 gap-1.5 self-center border-2 border-primary bg-primary/5 px-2.5 text-xs text-primary shadow-sm hover:bg-primary/10 disabled:border-input disabled:bg-muted disabled:text-muted-foreground sm:min-w-44 sm:gap-2 sm:self-end sm:px-4 sm:text-sm"
+            :disabled="!parsedCodes.length || isUploading"
             @click="handleUpload"
           >
-            <Upload class="size-4" />
-            {{
-              challengeStore.isSubmitting
-                ? 'Đang upload...'
-                : `Upload mã (${parsedCodes.length})`
-            }}
+            <Loader2 v-if="isUploading" class="size-4 animate-spin" />
+            <Upload v-else class="size-4" />
+            <span class="sm:hidden">
+              {{ isUploading ? 'Đang gửi...' : `Gửi mã (${parsedCodes.length})` }}
+            </span>
+            <span class="hidden sm:inline">
+              {{
+                isUploading
+                  ? 'Đang upload...'
+                  : `Upload mã (${parsedCodes.length})`
+              }}
+            </span>
           </Button>
         </div>
       </SectionCard>
