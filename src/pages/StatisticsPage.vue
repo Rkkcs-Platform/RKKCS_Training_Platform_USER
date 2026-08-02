@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { onMounted, ref } from 'vue'
 import { PAGE_LABELS } from '@/common/constants/messages'
 import { showError } from '@/common/utils/toast'
 import { Button } from '@/components/ui/button'
@@ -10,16 +10,51 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import {
+  fetchOrdersStatistics,
+  fetchRevenueStatistics,
+} from '@/services/phase5.service'
 import { useStatisticsStore } from '@/stores/statistics'
 
 const labels = PAGE_LABELS.statistics
 const statisticsStore = useStatisticsStore()
+const revenue = ref<{
+  totalRevenue: number
+  totalOrders: number
+  days: number
+} | null>(null)
+const ordersByStatus = ref<Array<{ status: string; count: number; amount: number }>>(
+  [],
+)
+
+function formatCurrency(amount: number) {
+  return new Intl.NumberFormat('vi-VN', {
+    style: 'currency',
+    currency: 'VND',
+    maximumFractionDigits: 0,
+  }).format(amount)
+}
 
 async function loadData() {
   try {
     await statisticsStore.loadStatistics()
   } catch {
     showError(labels.loadFailed)
+  }
+
+  try {
+    const [rev, ord] = await Promise.all([
+      fetchRevenueStatistics(30),
+      fetchOrdersStatistics(),
+    ])
+    revenue.value = {
+      totalRevenue: rev.totalRevenue,
+      totalOrders: rev.totalOrders,
+      days: rev.days,
+    }
+    ordersByStatus.value = ord.byStatus ?? []
+  } catch {
+    // commerce stats optional if no orders yet
   }
 }
 
@@ -82,6 +117,30 @@ onMounted(() => {
             <p class="text-xs text-muted-foreground">{{ labels.accuracy }}</p>
             <p class="mt-1 text-2xl font-bold">
               {{ statisticsStore.stats.accuracy }}%
+            </p>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+
+    <Card v-if="revenue">
+      <CardHeader>
+        <CardTitle>Doanh thu ({{ revenue.days }} ngày)</CardTitle>
+        <CardDescription>
+          {{ formatCurrency(revenue.totalRevenue) }} ·
+          {{ revenue.totalOrders }} orders
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div class="grid gap-3 sm:grid-cols-2">
+          <div
+            v-for="row in ordersByStatus"
+            :key="row.status"
+            class="rounded-xl border p-4"
+          >
+            <p class="text-xs text-muted-foreground">{{ row.status }}</p>
+            <p class="mt-1 text-lg font-semibold">
+              {{ row.count }} · {{ formatCurrency(row.amount) }}
             </p>
           </div>
         </div>

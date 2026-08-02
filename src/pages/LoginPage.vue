@@ -70,7 +70,7 @@ async function handleSubmit() {
           {{ APP_LABELS.appName }}
         </h1>
         <p class="mt-2 text-sm text-muted-foreground sm:text-base">
-          Đăng nhập để quản lý vận hành shop
+          Đăng nhập để quản lý vận hành
         </p>
       </div>
 

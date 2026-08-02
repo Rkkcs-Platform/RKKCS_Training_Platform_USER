@@ -5,6 +5,8 @@ export interface AuthUser {
   role: string
   status: string
   staffCode?: string
+  avatar?: string
+  shopId?: string
 }
 
 export interface AuthResponse {

@@ -4,12 +4,12 @@ import type { UserStatistics } from '@/types/statistics'
 import { api } from './api'
 
 export async function fetchTodayChallenge() {
-  const { data } = await api.get<TodayChallenge>('/user/challenges/today')
+  const { data } = await api.get<TodayChallenge>('/batches/today')
   return data
 }
 
 export async function fetchTodayResult() {
-  const { data } = await api.get<SubmissionDetail>('/user/challenges/today/result')
+  const { data } = await api.get<SubmissionDetail>('/batches/today/result')
   return data
 }
 
@@ -20,7 +20,7 @@ export async function fetchUserStatistics() {
 
 export async function submitCodeRequest(code: string) {
   const { data } = await api.post<SubmitCodeResponse>(
-    '/user/challenges/today/submit',
+    '/batches/upload-code',
     { code },
   )
   return data

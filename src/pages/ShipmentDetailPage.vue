@@ -1,86 +1,104 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { useRoute } from 'vue-router'
-import { getMockShipment } from '@/common/mocks/operations.mock'
-import ComingSoonBanner from '@/components/shared/ComingSoonBanner.vue'
+import { onMounted, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { formatDisplayDate, showRequestFailed } from '@/common'
 import SectionCard from '@/components/shared/SectionCard.vue'
-import StatusBadge from '@/components/shared/StatusBadge.vue'
-import { cn } from '@/lib/utils'
+import ShipmentTracking from '@/components/shared/ShipmentTracking.vue'
+import { Button } from '@/components/ui/button'
+import { useShipmentsStore } from '@/stores/orders'
 
 const route = useRoute()
-const shipment = computed(() => getMockShipment(String(route.params.id)))
+const router = useRouter()
+const shipmentsStore = useShipmentsStore()
+
+async function loadDetail(id: string) {
+  try {
+    await shipmentsStore.loadShipmentDetail(id)
+  } catch {
+    shipmentsStore.clearDetail()
+    showRequestFailed('Không tải được chi tiết vận đơn')
+  }
+}
+
+onMounted(() => {
+  void loadDetail(String(route.params.id))
+})
+
+watch(
+  () => route.params.id,
+  (id) => {
+    if (id) void loadDetail(String(id))
+  },
+)
 </script>
 
 <template>
-  <div v-if="shipment" class="space-y-5">
-    <ComingSoonBanner />
+  <div v-if="shipmentsStore.isLoadingDetail" class="text-muted-foreground">
+    Đang tải tracking vận đơn...
+  </div>
 
-    <div class="flex flex-wrap items-center justify-between gap-3">
-      <div>
-        <h2 class="text-xl font-bold">{{ shipment.id }}</h2>
-        <p class="text-sm text-muted-foreground">{{ shipment.transactionCode }}</p>
-      </div>
-      <StatusBadge :status="shipment.status" />
+  <div v-else-if="shipmentsStore.detail" class="space-y-5">
+    <div>
+      <h2 class="text-xl font-bold">
+        {{ shipmentsStore.detail.shipmentCode }}
+      </h2>
+      <p class="text-sm text-muted-foreground">
+        Mã GD: {{ shipmentsStore.detail.transactionCode }}
+      </p>
+      <p class="text-sm text-muted-foreground">
+        Đơn hàng: {{ shipmentsStore.detail.orderCode || shipmentsStore.detail.orderId }}
+      </p>
     </div>
+
+    <SectionCard title="Tracking đơn hàng">
+      <ShipmentTracking
+        :status="shipmentsStore.detail.status"
+        :timeline="shipmentsStore.detail.timeline"
+        :events="shipmentsStore.detail.events"
+        :current-location="shipmentsStore.detail.currentLocation"
+        :map="shipmentsStore.detail.map"
+        map-height-class="h-72 sm:h-96"
+      />
+    </SectionCard>
 
     <SectionCard title="Thông tin vận chuyển">
       <dl class="grid gap-4 sm:grid-cols-2">
         <div>
-          <dt class="text-xs text-muted-foreground">Order ID</dt>
-          <dd class="mt-1 font-medium">{{ shipment.orderId }}</dd>
+          <dt class="text-xs text-muted-foreground">Đơn vị vận chuyển</dt>
+          <dd class="mt-1 font-medium">
+            {{ shipmentsStore.detail.carrier || '—' }}
+          </dd>
         </div>
         <div>
-          <dt class="text-xs text-muted-foreground">Carrier</dt>
-          <dd class="mt-1 font-medium">{{ shipment.carrier }}</dd>
+          <dt class="text-xs text-muted-foreground">Địa chỉ giao</dt>
+          <dd class="mt-1 font-medium">
+            {{ shipmentsStore.detail.deliveryAddress || '—' }}
+          </dd>
         </div>
         <div>
           <dt class="text-xs text-muted-foreground">ETA</dt>
-          <dd class="mt-1 font-medium">{{ shipment.eta }}</dd>
+          <dd class="mt-1 font-medium">
+            {{
+              shipmentsStore.detail.eta
+                ? formatDisplayDate(shipmentsStore.detail.eta)
+                : '—'
+            }}
+          </dd>
         </div>
       </dl>
-    </SectionCard>
 
-    <SectionCard title="Tracking timeline">
-      <div class="space-y-4">
-        <div
-          v-for="(step, index) in shipment.timeline"
-          :key="step.label"
-          class="flex gap-3"
-        >
-          <div class="flex flex-col items-center">
-            <div
-              :class="
-                cn(
-                  'size-3 rounded-full',
-                  step.done ? 'bg-emerald-500' : step.current ? 'bg-primary' : 'bg-muted',
-                )
-              "
-            />
-            <div
-              v-if="index < shipment.timeline.length - 1"
-              class="my-1 w-px flex-1 bg-border"
-            />
-          </div>
-          <div class="pb-4">
-            <p
-              :class="
-                cn(
-                  'text-sm font-medium',
-                  step.current ? 'text-primary' : step.done ? 'text-foreground' : 'text-muted-foreground',
-                )
-              "
-            >
-              {{ step.label }}
-            </p>
-          </div>
-        </div>
-      </div>
-    </SectionCard>
-
-    <SectionCard title="Map preview">
-      <div class="flex h-40 items-center justify-center rounded-xl border border-dashed bg-muted/40 text-sm text-muted-foreground">
-        Bản đồ tracking sẽ hiển thị tại đây (Phase 2)
-      </div>
+      <Button
+        class="mt-4 w-full sm:w-auto"
+        variant="outline"
+        @click="
+          router.push({
+            name: 'order-detail',
+            params: { id: shipmentsStore.detail!.orderId },
+          })
+        "
+      >
+        Cập nhật đơn / trạng thái ship
+      </Button>
     </SectionCard>
   </div>
 

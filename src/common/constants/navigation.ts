@@ -50,7 +50,6 @@ export const NAV_ITEMS: NavItem[] = [
     group: 'main',
     showInBottomNav: true,
     showInSidebar: true,
-    comingSoon: true,
   },
   {
     name: 'shipments',
@@ -59,7 +58,6 @@ export const NAV_ITEMS: NavItem[] = [
     group: 'main',
     showInBottomNav: true,
     showInSidebar: true,
-    comingSoon: true,
   },
   {
     name: 'menu',
@@ -75,7 +73,6 @@ export const NAV_ITEMS: NavItem[] = [
     icon: Users,
     group: 'management',
     showInSidebar: true,
-    comingSoon: true,
   },
   {
     name: 'payments',
@@ -83,7 +80,6 @@ export const NAV_ITEMS: NavItem[] = [
     icon: CreditCard,
     group: 'management',
     showInSidebar: true,
-    comingSoon: true,
   },
   {
     name: 'statistics',
@@ -105,7 +101,6 @@ export const NAV_ITEMS: NavItem[] = [
     icon: Newspaper,
     group: 'management',
     showInSidebar: true,
-    comingSoon: true,
   },
   {
     name: 'profile',
@@ -113,7 +108,6 @@ export const NAV_ITEMS: NavItem[] = [
     icon: User,
     group: 'account',
     showInSidebar: true,
-    comingSoon: true,
   },
   {
     name: 'settings',
@@ -121,7 +115,6 @@ export const NAV_ITEMS: NavItem[] = [
     icon: Settings,
     group: 'account',
     showInSidebar: true,
-    comingSoon: true,
   },
 ]
 
@@ -144,8 +137,10 @@ export const ROUTE_TITLES: Record<string, string> = {
   history: 'Lịch sử nhập mã',
   statistics: 'Statistics',
   customers: 'Customers',
+  'customer-detail': 'Customer Detail',
   payments: 'Payments',
   news: 'News',
+  'news-detail': 'News Detail',
   profile: 'Profile',
   settings: 'Settings',
 }

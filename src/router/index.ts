@@ -75,27 +75,37 @@ const router = createRouter({
         {
           path: 'customers',
           name: 'customers',
-          component: () => import('@/pages/ComingSoonPage.vue'),
+          component: () => import('@/pages/CustomersPage.vue'),
+        },
+        {
+          path: 'customers/:id',
+          name: 'customer-detail',
+          component: () => import('@/pages/CustomerDetailPage.vue'),
         },
         {
           path: 'payments',
           name: 'payments',
-          component: () => import('@/pages/ComingSoonPage.vue'),
+          component: () => import('@/pages/PaymentsPage.vue'),
         },
         {
           path: 'news',
           name: 'news',
-          component: () => import('@/pages/ComingSoonPage.vue'),
+          component: () => import('@/pages/NewsPage.vue'),
+        },
+        {
+          path: 'news/:slug',
+          name: 'news-detail',
+          component: () => import('@/pages/NewsDetailPage.vue'),
         },
         {
           path: 'profile',
           name: 'profile',
-          component: () => import('@/pages/ComingSoonPage.vue'),
+          component: () => import('@/pages/ProfilePage.vue'),
         },
         {
           path: 'settings',
           name: 'settings',
-          component: () => import('@/pages/ComingSoonPage.vue'),
+          component: () => import('@/pages/SettingsPage.vue'),
         },
         // Legacy redirect
         {

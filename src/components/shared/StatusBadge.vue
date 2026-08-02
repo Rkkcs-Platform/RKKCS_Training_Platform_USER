@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils'
 
 type StatusTone =
   | 'pending'
+  | 'confirmed'
   | 'shipping'
   | 'delivered'
   | 'cancelled'
@@ -14,6 +15,7 @@ type StatusTone =
   | 'error'
   | 'paid'
   | 'unpaid'
+  | 'failed'
 
 const props = defineProps<{
   status: StatusTone
@@ -25,6 +27,10 @@ const config = computed(() => {
     pending: {
       label: 'Pending',
       className: 'border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-50',
+    },
+    confirmed: {
+      label: 'Confirmed',
+      className: 'border-sky-200 bg-sky-50 text-sky-700 hover:bg-sky-50',
     },
     shipping: {
       label: 'Shipping',
@@ -61,6 +67,10 @@ const config = computed(() => {
     unpaid: {
       label: 'Unpaid',
       className: 'border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-50',
+    },
+    failed: {
+      label: 'Failed',
+      className: 'border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-50',
     },
   }
 
