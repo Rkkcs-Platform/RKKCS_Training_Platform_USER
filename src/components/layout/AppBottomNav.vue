@@ -1,9 +1,11 @@
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n'
 import { RouterLink, useRoute } from 'vue-router'
 import { BOTTOM_NAV_ITEMS } from '@/common/constants/navigation'
 import { cn } from '@/lib/utils'
 
 const route = useRoute()
+const { t } = useI18n()
 
 function isActive(name: string) {
   if (name === 'menu') {
@@ -36,7 +38,7 @@ function isActive(name: string) {
           :is="item.icon"
           :class="cn('size-5', isActive(item.name) && 'stroke-[2.5px]')"
         />
-        <span class="truncate">{{ item.label.split(' ')[0] }}</span>
+        <span class="truncate">{{ t(item.labelKey).split(' ')[0] }}</span>
       </RouterLink>
     </div>
   </nav>

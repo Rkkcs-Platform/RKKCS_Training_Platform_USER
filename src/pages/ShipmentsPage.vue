@@ -1,18 +1,20 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
 import { formatDisplayDate, showRequestFailed } from '@/common'
 import StatusBadge from '@/components/shared/StatusBadge.vue'
 import { Card, CardContent } from '@/components/ui/card'
 import { useShipmentsStore } from '@/stores/orders'
 
+const { t } = useI18n()
 const shipmentsStore = useShipmentsStore()
 
 onMounted(async () => {
   try {
     await shipmentsStore.loadShipments()
   } catch {
-    showRequestFailed('Không tải được danh sách vận đơn')
+    showRequestFailed(t('shipments.loadFailed'))
   }
 })
 </script>
@@ -20,7 +22,7 @@ onMounted(async () => {
 <template>
   <div class="space-y-5">
     <div v-if="shipmentsStore.isLoadingList" class="text-muted-foreground">
-      Đang tải vận đơn...
+      {{ t('shipments.loadingShipments') }}
     </div>
 
     <template v-else>
@@ -39,7 +41,7 @@ onMounted(async () => {
                   · {{ shipment.carrier || '—' }}
                 </p>
                 <p class="mt-1 text-xs text-muted-foreground">
-                  Vị trí: {{ shipment.currentLocation || '—' }}
+                  {{ t('shipments.position') }}: {{ shipment.currentLocation || '—' }}
                   · ETA:
                   {{
                     shipment.eta
@@ -58,7 +60,7 @@ onMounted(async () => {
         v-if="!shipmentsStore.items.length"
         class="rounded-xl border border-dashed p-8 text-center text-muted-foreground"
       >
-        Chưa có vận đơn
+        {{ t('shipments.noShipments') }}
       </p>
     </template>
   </div>

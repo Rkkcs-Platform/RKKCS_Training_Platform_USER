@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { getErrorMessage, showRequestFailed } from '@/common'
 import SectionCard from '@/components/shared/SectionCard.vue'
 import { fetchNews, type NewsItem } from '@/services/phase5.service'
 
+const { t } = useI18n()
 const router = useRouter()
 const isLoading = ref(false)
 const items = ref<NewsItem[]>([])
@@ -20,7 +22,7 @@ async function load() {
     const data = await fetchNews({ page: 1, limit: 50 })
     items.value = data.items ?? []
   } catch (error) {
-    showRequestFailed(getErrorMessage(error) || 'Không tải được tin tức')
+    showRequestFailed(getErrorMessage(error) || t('news.loadFailed'))
   } finally {
     isLoading.value = false
   }
@@ -33,13 +35,13 @@ onMounted(() => {
 
 <template>
   <div class="space-y-4">
-    <SectionCard title="News" description="Tin tức vận hành từ Admin">
-      <div v-if="isLoading" class="text-sm text-muted-foreground">Đang tải...</div>
+    <SectionCard :title="t('news.title')" :description="t('news.description')">
+      <div v-if="isLoading" class="text-sm text-muted-foreground">{{ t('common.loading') }}</div>
       <div
         v-else-if="!items.length"
         class="rounded-xl border border-dashed p-8 text-center text-muted-foreground"
       >
-        Chưa có tin đã publish
+        {{ t('news.noNews') }}
       </div>
       <div v-else class="space-y-3">
         <button

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { LogOut } from 'lucide-vue-next'
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import {
   NAV_ITEMS,
@@ -21,6 +22,7 @@ const emit = defineEmits<{
   close: []
 }>()
 
+const { t } = useI18n()
 const authStore = useAuthStore()
 const router = useRouter()
 const route = useRoute()
@@ -76,7 +78,7 @@ function handleNavigate() {
         </div>
         <div class="min-w-0">
           <p class="truncate font-semibold">{{ authStore.user?.name }}</p>
-          <p class="text-xs text-primary-foreground/80">Nhân viên vận hành - CN Hà Nội</p>
+          <p class="text-xs text-primary-foreground/80">{{ t('sidebar.roleLabel') }}</p>
         </div>
       </div>
     </div>
@@ -84,7 +86,7 @@ function handleNavigate() {
     <div class="flex-1 space-y-5 overflow-y-auto p-4" @click="handleNavigate">
       <div v-for="group in SIDEBAR_NAV_GROUPS" :key="group.key">
         <p class="mb-2 px-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-          {{ group.label }}
+          {{ t(group.labelKey) }}
         </p>
         <div class="space-y-1">
           <MenuNavItem
@@ -104,7 +106,7 @@ function handleNavigate() {
         @click="handleLogout"
       >
         <LogOut class="size-4" />
-        Logout
+        {{ t('auth.logout') }}
       </Button>
     </div>
   </aside>

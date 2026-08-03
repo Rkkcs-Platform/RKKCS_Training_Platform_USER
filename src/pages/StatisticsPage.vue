@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { PAGE_LABELS } from '@/common/constants/messages'
 import { showError } from '@/common/utils/toast'
+import { useFormatCurrency } from '@/common/utils/format'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -16,6 +18,7 @@ import {
 } from '@/services/phase5.service'
 import { useStatisticsStore } from '@/stores/statistics'
 
+const { t } = useI18n()
 const labels = PAGE_LABELS.statistics
 const statisticsStore = useStatisticsStore()
 const revenue = ref<{
@@ -27,13 +30,7 @@ const ordersByStatus = ref<Array<{ status: string; count: number; amount: number
   [],
 )
 
-function formatCurrency(amount: number) {
-  return new Intl.NumberFormat('vi-VN', {
-    style: 'currency',
-    currency: 'VND',
-    maximumFractionDigits: 0,
-  }).format(amount)
-}
+const formatCurrency = useFormatCurrency()
 
 async function loadData() {
   try {
@@ -72,7 +69,7 @@ onMounted(() => {
       </CardHeader>
       <CardContent>
         <div v-if="statisticsStore.isLoading" class="text-muted-foreground">
-          Đang tải...
+          {{ t('common.loading') }}
         </div>
 
         <div
@@ -81,7 +78,7 @@ onMounted(() => {
         >
           <p class="text-muted-foreground">{{ labels.loadFailed }}</p>
           <Button variant="outline" @click="loadData">
-            Thử lại
+            {{ t('common.retry') }}
           </Button>
         </div>
 
@@ -125,7 +122,7 @@ onMounted(() => {
 
     <Card v-if="revenue">
       <CardHeader>
-        <CardTitle>Doanh thu ({{ revenue.days }} ngày)</CardTitle>
+        <CardTitle>{{ t('statistics.revenueTitle', { days: revenue.days }) }}</CardTitle>
         <CardDescription>
           {{ formatCurrency(revenue.totalRevenue) }} ·
           {{ revenue.totalOrders }} orders

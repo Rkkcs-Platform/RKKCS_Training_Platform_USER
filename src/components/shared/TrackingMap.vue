@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import type { ShipmentMapData } from '@/types/order'
@@ -9,6 +10,7 @@ const props = defineProps<{
   heightClass?: string
 }>()
 
+const { t } = useI18n()
 const container = ref<HTMLElement | null>(null)
 let leafletMap: L.Map | null = null
 let layerGroup: L.LayerGroup | null = null
@@ -54,13 +56,13 @@ function renderMap() {
   const currentMarker = L.marker([current.lat, current.lng], {
     icon: currentIcon,
   }).bindPopup(
-    `<strong>${current.label || 'Vị trí hiện tại'}</strong><br/>Mock GPS`,
+    `<strong>${current.label || t('trackingMap.currentPosition')}</strong>`,
   )
 
   const destMarker = L.marker([dest.lat, dest.lng], {
     icon: destIcon,
   }).bindPopup(
-    `<strong>${dest.label || 'Điểm giao hàng'}</strong><br/>Mock GPS`,
+    `<strong>${dest.label || t('trackingMap.deliveryPoint')}</strong>`,
   )
 
   const line = L.polyline(
@@ -114,13 +116,6 @@ onBeforeUnmount(() => {
 
 <template>
   <div class="space-y-2">
-    <div
-      v-if="map?.isMock !== false"
-      class="rounded-lg border border-dashed bg-muted/40 px-3 py-2 text-xs text-muted-foreground"
-    >
-      Bản đồ demo (Leaflet + OSM) — tọa độ <strong>mock</strong>
-      (mặc định thành phố Nhật). Không phải GPS thật.
-    </div>
 
     <div
       ref="container"
@@ -131,11 +126,11 @@ onBeforeUnmount(() => {
     <div class="flex flex-wrap gap-4 text-xs text-muted-foreground">
       <span class="inline-flex items-center gap-2">
         <span class="size-2.5 rounded-full bg-blue-600" />
-        Vị trí đơn hiện tại
+        {{ t('trackingMap.currentOrderPosition') }}
       </span>
       <span class="inline-flex items-center gap-2">
         <span class="size-2.5 rounded-full bg-red-600" />
-        Điểm cần giao đến
+        {{ t('trackingMap.deliveryDestination') }}
       </span>
     </div>
   </div>

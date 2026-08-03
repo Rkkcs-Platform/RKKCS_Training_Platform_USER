@@ -1,12 +1,16 @@
 <script setup lang="ts">
 import { onMounted, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { formatDisplayDate, showRequestFailed } from '@/common'
+import { useCleanText } from '@/common/utils/format'
 import SectionCard from '@/components/shared/SectionCard.vue'
 import ShipmentTracking from '@/components/shared/ShipmentTracking.vue'
 import { Button } from '@/components/ui/button'
 import { useShipmentsStore } from '@/stores/orders'
 
+const { t } = useI18n()
+const cleanText = useCleanText()
 const route = useRoute()
 const router = useRouter()
 const shipmentsStore = useShipmentsStore()
@@ -16,7 +20,7 @@ async function loadDetail(id: string) {
     await shipmentsStore.loadShipmentDetail(id)
   } catch {
     shipmentsStore.clearDetail()
-    showRequestFailed('Không tải được chi tiết vận đơn')
+    showRequestFailed(t('shipments.loadDetailFailed'))
   }
 }
 
@@ -34,7 +38,7 @@ watch(
 
 <template>
   <div v-if="shipmentsStore.isLoadingDetail" class="text-muted-foreground">
-    Đang tải tracking vận đơn...
+    {{ t('shipments.loadingDetail') }}
   </div>
 
   <div v-else-if="shipmentsStore.detail" class="space-y-5">
@@ -43,36 +47,36 @@ watch(
         {{ shipmentsStore.detail.shipmentCode }}
       </h2>
       <p class="text-sm text-muted-foreground">
-        Mã GD: {{ shipmentsStore.detail.transactionCode }}
+        {{ t('shipments.transactionCode') }}: {{ shipmentsStore.detail.transactionCode }}
       </p>
       <p class="text-sm text-muted-foreground">
-        Đơn hàng: {{ shipmentsStore.detail.orderCode || shipmentsStore.detail.orderId }}
+        {{ t('shipments.orderLabel') }}: {{ shipmentsStore.detail.orderCode || shipmentsStore.detail.orderId }}
       </p>
     </div>
 
-    <SectionCard title="Tracking đơn hàng">
+    <SectionCard :title="t('shipments.trackingTitle')">
       <ShipmentTracking
         :status="shipmentsStore.detail.status"
         :timeline="shipmentsStore.detail.timeline"
         :events="shipmentsStore.detail.events"
-        :current-location="shipmentsStore.detail.currentLocation"
+        :current-location="cleanText(shipmentsStore.detail.currentLocation)"
         :map="shipmentsStore.detail.map"
         map-height-class="h-72 sm:h-96"
       />
     </SectionCard>
 
-    <SectionCard title="Thông tin vận chuyển">
+    <SectionCard :title="t('shipments.infoTitle')">
       <dl class="grid gap-4 sm:grid-cols-2">
         <div>
-          <dt class="text-xs text-muted-foreground">Đơn vị vận chuyển</dt>
+          <dt class="text-xs text-muted-foreground">{{ t('shipments.carrierLabel') }}</dt>
           <dd class="mt-1 font-medium">
             {{ shipmentsStore.detail.carrier || '—' }}
           </dd>
         </div>
         <div>
-          <dt class="text-xs text-muted-foreground">Địa chỉ giao</dt>
+          <dt class="text-xs text-muted-foreground">{{ t('shipments.deliveryAddressLabel') }}</dt>
           <dd class="mt-1 font-medium">
-            {{ shipmentsStore.detail.deliveryAddress || '—' }}
+            {{ cleanText(shipmentsStore.detail.deliveryAddress) || '—' }}
           </dd>
         </div>
         <div>
@@ -97,7 +101,7 @@ watch(
           })
         "
       >
-        Cập nhật đơn / trạng thái ship
+        {{ t('shipments.updateOrderStatus') }}
       </Button>
     </SectionCard>
   </div>
@@ -106,6 +110,6 @@ watch(
     v-else
     class="rounded-xl border border-dashed p-10 text-center text-muted-foreground"
   >
-    Không tìm thấy vận đơn
+    {{ t('shipments.shipmentNotFound') }}
   </div>
 </template>

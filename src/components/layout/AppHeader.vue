@@ -2,9 +2,10 @@
 import { Bell, Menu } from 'lucide-vue-next'
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
-import { ROUTE_TITLES } from '@/common/constants/navigation'
+import { getRouteTitle } from '@/common/constants/navigation'
 import { APP_LABELS } from '@/common/constants/messages'
 import { Button } from '@/components/ui/button'
+import LanguageSwitcher from '@/components/shared/LanguageSwitcher.vue'
 
 const props = defineProps<{
   showMenuButton?: boolean
@@ -18,7 +19,7 @@ const route = useRoute()
 
 const title = computed(() => {
   const routeName = String(route.name ?? 'dashboard')
-  return ROUTE_TITLES[routeName] ?? APP_LABELS.appName
+  return getRouteTitle(routeName)
 })
 </script>
 
@@ -38,6 +39,8 @@ const title = computed(() => {
       <div class="min-w-0 flex-1">
         <p class="truncate text-base font-semibold">{{ title }}</p>
       </div>
+
+      <LanguageSwitcher />
 
       <Button variant="ghost" size="icon" class="relative">
         <Bell class="size-5" />

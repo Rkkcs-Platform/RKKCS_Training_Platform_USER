@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { onMounted, reactive, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { getErrorMessage, showRequestFailed, showSuccess } from '@/common'
+import { useCleanText, useFormatCurrency } from '@/common/utils/format'
 import SectionCard from '@/components/shared/SectionCard.vue'
 import ShipmentTracking from '@/components/shared/ShipmentTracking.vue'
 import StatusBadge from '@/components/shared/StatusBadge.vue'
@@ -20,12 +22,18 @@ import type {
   ShipmentStatus,
 } from '@/types/order'
 
+const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const ordersStore = useOrdersStore()
 const isSaving = ref(false)
 const products = ref<ProductListItem[]>([])
 const cities = ref<MapCity[]>([])
+
+function translateProductName(name: string) {
+  if (/^Sản phẩm mặc định$/i.test(name)) return t('orders.defaultProduct')
+  return name
+}
 
 const form = reactive({
   status: 'confirmed' as OrderStatus,
@@ -57,13 +65,8 @@ const shipmentStatuses: ShipmentStatus[] = [
   'delivered',
 ]
 
-function formatCurrency(amount: number) {
-  return new Intl.NumberFormat('vi-VN', {
-    style: 'currency',
-    currency: 'VND',
-    maximumFractionDigits: 0,
-  }).format(amount)
-}
+const formatCurrency = useFormatCurrency()
+const cleanText = useCleanText()
 
 function syncFormFromDetail() {
   const detail = ordersStore.detail
@@ -79,8 +82,8 @@ function syncFormFromDetail() {
   form.email = detail.customer.email || ''
   form.shipmentStatus = detail.shipment?.status || 'pending'
   form.carrier = detail.shipment?.carrier || ''
-  form.currentLocation = detail.shipment?.currentLocation || ''
-  form.deliveryAddress = detail.shipment?.deliveryAddress || ''
+  form.currentLocation = cleanText(detail.shipment?.currentLocation || '')
+  form.deliveryAddress = cleanText(detail.shipment?.deliveryAddress || '')
   form.note = ''
   form.currentCityId =
     detail.shipment?.map?.currentCityId
@@ -100,7 +103,7 @@ async function loadDetail(id: string) {
     syncFormFromDetail()
   } catch {
     ordersStore.clearDetail()
-    showRequestFailed('Không tải được chi tiết đơn hàng')
+    showRequestFailed(t('orders.loadDetailFailed'))
   }
 }
 
@@ -151,9 +154,9 @@ async function handleSave() {
     })
     ordersStore.detail = updated
     syncFormFromDetail()
-    showSuccess('Đã cập nhật đơn hàng')
+    showSuccess(t('orders.orderUpdated'))
   } catch (error) {
-    showRequestFailed(getErrorMessage(error) || 'Cập nhật đơn hàng thất bại')
+    showRequestFailed(getErrorMessage(error) || t('orders.orderUpdateFailed'))
   } finally {
     isSaving.value = false
   }
@@ -175,7 +178,7 @@ watch(
 
 <template>
   <div v-if="ordersStore.isLoadingDetail" class="text-muted-foreground">
-    Đang tải chi tiết đơn hàng...
+    {{ t('orders.loadingDetail') }}
   </div>
 
   <div v-else-if="ordersStore.detail" class="space-y-5">
@@ -183,24 +186,24 @@ watch(
       <div>
         <h2 class="text-xl font-bold">{{ ordersStore.detail.orderCode }}</h2>
         <p class="text-sm text-muted-foreground">
-          Mã giao dịch: {{ ordersStore.detail.transactionCode }}
+          {{ t('orders.transactionCode') }}: {{ ordersStore.detail.transactionCode }}
         </p>
         <p
           v-if="ordersStore.detail.shipment"
           class="text-sm text-muted-foreground"
         >
-          Mã vận đơn: {{ ordersStore.detail.shipment.shipmentCode }}
+          {{ t('orders.shipmentCode') }}: {{ ordersStore.detail.shipment.shipmentCode }}
         </p>
       </div>
       <StatusBadge :status="ordersStore.detail.status" />
     </div>
 
-    <SectionCard title="Sản phẩm trong đơn">
+    <SectionCard :title="t('orders.productsTitle')">
       <div
         v-if="!ordersStore.detail.items?.length"
         class="text-sm text-muted-foreground"
       >
-        Chưa có sản phẩm
+        {{ t('orders.noProducts') }}
       </div>
       <div v-else class="space-y-2">
         <div
@@ -209,7 +212,7 @@ watch(
           class="flex items-center justify-between gap-3 rounded-xl border p-3"
         >
           <div class="min-w-0">
-            <p class="font-semibold">{{ item.productName }}</p>
+            <p class="font-semibold">{{ translateProductName(item.productName) }}</p>
             <p class="text-xs text-muted-foreground">
               {{ item.productCode }} · x{{ item.quantity }}
             </p>
@@ -220,20 +223,20 @@ watch(
         </div>
       </div>
       <p class="mt-3 text-sm font-medium">
-        Tổng:
+        {{ t('orders.total') }}:
         {{ formatCurrency(ordersStore.detail.amount) }}
       </p>
     </SectionCard>
 
     <SectionCard
       v-if="ordersStore.detail.shipment"
-      title="Tracking vận chuyển"
+      :title="t('orders.trackingTitle')"
     >
       <ShipmentTracking
         :status="ordersStore.detail.shipment.status"
         :timeline="ordersStore.detail.shipment.timeline"
         :events="ordersStore.detail.shipment.events"
-        :current-location="ordersStore.detail.shipment.currentLocation"
+        :current-location="cleanText(ordersStore.detail.shipment.currentLocation)"
         :map="ordersStore.detail.shipment.map"
         map-height-class="h-56 sm:h-72"
       />
@@ -247,20 +250,18 @@ watch(
           })
         "
       >
-        Xem trang tracking đầy đủ
+        {{ t('orders.viewFullTracking') }}
       </Button>
     </SectionCard>
 
-    <SectionCard title="Cập nhật đơn hàng">
+    <SectionCard :title="t('orders.updateOrderTitle')">
       <p class="mb-4 text-sm text-muted-foreground">
-        Mã giao dịch / mã vận đơn chỉ là mã hệ thống.
-        Thông tin <strong>người đặt</strong> (tên, SĐT, email, địa chỉ giao) nhập riêng bên dưới.
-        Đổi <strong>thành phố hiện tại</strong> + <strong>thành phố giao</strong>
-        rồi Lưu — map tự nối 2 điểm (data tọa độ mock trong catalog).
+        {{ t('orders.transactionCode') }} / {{ t('orders.shipmentCode') }}
+        — <strong>{{ t('orders.updateOrderDescriptionCustomer') }}</strong>
       </p>
       <div class="grid gap-4 sm:grid-cols-2">
         <div class="space-y-2">
-          <label class="text-sm font-medium">Trạng thái đơn</label>
+          <label class="text-sm font-medium">{{ t('orders.orderStatusLabel') }}</label>
           <select
             v-model="form.status"
             class="flex h-11 w-full rounded-lg border border-input bg-background px-3 text-sm"
@@ -272,34 +273,34 @@ watch(
         </div>
 
         <div class="space-y-2">
-          <label class="text-sm font-medium">Tên người đặt hàng</label>
+          <label class="text-sm font-medium">{{ t('orders.customerNameLabel') }}</label>
           <Input
             v-model="form.fullName"
             class="h-11"
-            placeholder="Nguyễn Văn A"
+            :placeholder="t('orders.customerNamePlaceholder')"
           />
         </div>
 
         <div class="space-y-2">
-          <label class="text-sm font-medium">SĐT người đặt</label>
+          <label class="text-sm font-medium">{{ t('orders.customerPhoneLabel') }}</label>
           <Input
             v-model="form.phone"
             class="h-11"
-            placeholder="0901234567"
+            :placeholder="t('orders.customerPhonePlaceholder')"
           />
         </div>
 
         <div class="space-y-2">
-          <label class="text-sm font-medium">Email người đặt</label>
+          <label class="text-sm font-medium">{{ t('orders.customerEmailLabel') }}</label>
           <Input
             v-model="form.email"
             class="h-11"
-            placeholder="email@example.com"
+            :placeholder="t('orders.customerEmailPlaceholder')"
           />
         </div>
 
         <div class="space-y-2">
-          <label class="text-sm font-medium">Trạng thái vận đơn</label>
+          <label class="text-sm font-medium">{{ t('orders.shipmentStatusLabel') }}</label>
           <select
             v-model="form.shipmentStatus"
             class="flex h-11 w-full rounded-lg border border-input bg-background px-3 text-sm"
@@ -315,12 +316,12 @@ watch(
         </div>
 
         <div class="space-y-2">
-          <label class="text-sm font-medium">Thành phố hiện tại (ước lượng)</label>
+          <label class="text-sm font-medium">{{ t('orders.currentCityLabel') }}</label>
           <select
             v-model="form.currentCityId"
             class="flex h-11 w-full rounded-lg border border-input bg-background px-3 text-sm"
           >
-            <option disabled value="">Chọn thành phố</option>
+            <option disabled value="">{{ t('orders.selectCity') }}</option>
             <option
               v-for="city in cities"
               :key="city.id"
@@ -332,12 +333,12 @@ watch(
         </div>
 
         <div class="space-y-2">
-          <label class="text-sm font-medium">Thành phố giao hàng (ước lượng)</label>
+          <label class="text-sm font-medium">{{ t('orders.destCityLabel') }}</label>
           <select
             v-model="form.destCityId"
             class="flex h-11 w-full rounded-lg border border-input bg-background px-3 text-sm"
           >
-            <option disabled value="">Chọn thành phố</option>
+            <option disabled value="">{{ t('orders.selectCity') }}</option>
             <option
               v-for="city in cities"
               :key="`dest-${city.id}`"
@@ -350,63 +351,63 @@ watch(
 
         <div class="space-y-2 sm:col-span-2">
           <label class="text-sm font-medium">
-            Vị trí hiện tại chi tiết (đường / số nhà)
+            {{ t('orders.currentLocationLabel') }}
           </label>
           <Input
             v-model="form.currentLocation"
             class="h-11"
-            placeholder="VD: 2 Chome-24-12 Shibuya, Shibuya City, Tokyo"
+            :placeholder="t('orders.currentLocationPlaceholder')"
           />
           <p class="text-xs text-muted-foreground">
-            Nhập đủ đường + số nhà + thành phố để ghim bản đồ chính xác (OpenStreetMap).
+            {{ t('orders.currentLocationHint') }}
           </p>
         </div>
 
         <div class="space-y-2 sm:col-span-2">
           <label class="text-sm font-medium">
-            Địa chỉ giao hàng chi tiết (đường / số nhà)
+            {{ t('orders.deliveryAddressLabel') }}
           </label>
           <Input
             v-model="form.deliveryAddress"
             class="h-11"
-            placeholder="VD: 1 Chome-1-2 Shibuya, Shibuya City, Tokyo 150-0002"
+            :placeholder="t('orders.deliveryAddressPlaceholder')"
           />
         </div>
 
         <div class="space-y-2">
-          <label class="text-sm font-medium">Đơn vị vận chuyển</label>
+          <label class="text-sm font-medium">{{ t('orders.carrierLabel') }}</label>
           <Input v-model="form.carrier" class="h-11" />
         </div>
 
         <div class="space-y-2 sm:col-span-2">
-          <label class="text-sm font-medium">Ghi chú tracking</label>
+          <label class="text-sm font-medium">{{ t('orders.trackingNoteLabel') }}</label>
           <Input
             v-model="form.note"
             class="h-11"
-            placeholder="VD: Đã tới hub Quận 7, đang giao..."
+            :placeholder="t('orders.trackingNotePlaceholder')"
           />
         </div>
 
         <div class="space-y-2">
-          <label class="text-sm font-medium">Sản phẩm</label>
+          <label class="text-sm font-medium">{{ t('orders.productLabel') }}</label>
           <select
             v-model="form.productId"
             class="flex h-11 w-full rounded-lg border border-input bg-background px-3 text-sm"
           >
-            <option disabled value="">Chọn sản phẩm</option>
+            <option disabled value="">{{ t('orders.selectProduct') }}</option>
             <option
               v-for="product in products"
               :key="product.id"
               :value="product.id"
             >
-              {{ product.productCode }} — {{ product.name }}
+              {{ product.productCode }} — {{ translateProductName(product.name) }}
               ({{ formatCurrency(product.price) }})
             </option>
           </select>
         </div>
 
         <div class="space-y-2">
-          <label class="text-sm font-medium">Số lượng</label>
+          <label class="text-sm font-medium">{{ t('orders.quantityLabel') }}</label>
           <Input
             v-model.number="form.quantity"
             type="number"
@@ -418,7 +419,7 @@ watch(
 
       <div class="mt-4 flex flex-wrap gap-2">
         <Button :disabled="isSaving" @click="handleSave">
-          {{ isSaving ? 'Đang lưu...' : 'Lưu cập nhật' }}
+          {{ isSaving ? t('common.saving') : t('orders.saveUpdate') }}
         </Button>
         <Button
           v-if="ordersStore.detail.shipment"
@@ -430,12 +431,12 @@ watch(
             })
           "
         >
-          Tracking vận đơn
+          {{ t('orders.trackShipment') }}
         </Button>
       </div>
     </SectionCard>
 
-    <SectionCard title="Thanh toán">
+    <SectionCard :title="t('orders.paymentTitle')">
       <template v-if="ordersStore.detail.payment">
         <p class="font-medium">
           {{ ordersStore.detail.payment.paymentCode }}
@@ -446,7 +447,7 @@ watch(
           class="mt-2"
         />
       </template>
-      <p v-else class="text-sm text-muted-foreground">Chưa có thanh toán</p>
+      <p v-else class="text-sm text-muted-foreground">{{ t('orders.noPayment') }}</p>
     </SectionCard>
   </div>
 
@@ -454,6 +455,6 @@ watch(
     v-else
     class="rounded-xl border border-dashed p-10 text-center text-muted-foreground"
   >
-    Không tìm thấy đơn hàng
+    {{ t('orders.orderNotFound') }}
   </div>
 </template>

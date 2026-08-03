@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { LogOut } from 'lucide-vue-next'
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { NAV_ITEMS, SIDEBAR_NAV_GROUPS } from '@/common/constants/navigation'
 import { showLogoutSuccess } from '@/common'
@@ -9,6 +10,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { useAuthStore } from '@/stores/auth'
 
+const { t } = useI18n()
 const authStore = useAuthStore()
 const router = useRouter()
 
@@ -42,14 +44,14 @@ async function handleLogout() {
         </div>
         <div>
           <p class="text-lg font-semibold">{{ authStore.user?.name }}</p>
-          <p class="text-sm text-primary-foreground/80">Shop Owner</p>
+          <p class="text-sm text-primary-foreground/80">{{ t('sidebar.shopOwner') }}</p>
         </div>
       </CardContent>
     </Card>
 
     <div v-for="group in SIDEBAR_NAV_GROUPS" :key="group.key" class="space-y-2">
       <p class="px-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-        {{ group.label }}
+        {{ t(group.labelKey) }}
       </p>
       <div class="space-y-1 rounded-xl border bg-background p-2 shadow-sm">
         <MenuNavItem
@@ -66,7 +68,7 @@ async function handleLogout() {
       @click="handleLogout"
     >
       <LogOut class="size-4" />
-      Logout
+      {{ t('auth.logout') }}
     </Button>
   </div>
 </template>

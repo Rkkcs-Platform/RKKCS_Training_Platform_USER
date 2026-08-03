@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
-import { CheckCircle2, Loader2, Upload } from 'lucide-vue-next'
+import { RouterLink, useRouter } from 'vue-router'
+import { CheckCircle2, ExternalLink, Info, Loader2, Upload } from 'lucide-vue-next'
+import { useI18n } from 'vue-i18n'
 import {
   formatDisplayTime,
-  showChallengeCompleted,
   showChallengeLoadFailed,
   showSubmitFailed,
   showSubmitResult,
@@ -14,12 +15,27 @@ import ProgressBar from '@/components/shared/ProgressBar.vue'
 import SectionCard from '@/components/shared/SectionCard.vue'
 import StatusBadge from '@/components/shared/StatusBadge.vue'
 import { Button } from '@/components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import { fetchOrderByTransactionCode } from '@/services/order.service'
 import { useChallengeStore } from '@/stores/challenge'
+import { useAuthStore } from '@/stores/auth'
 
+const { t } = useI18n()
+const router = useRouter()
 const labels = PAGE_LABELS.challenge
 const challengeStore = useChallengeStore()
+const authStore = useAuthStore()
 const codesInput = ref('')
 const isUploading = ref(false)
+const navigatingCode = ref<string | null>(null)
+const showCompletedDialog = ref(false)
 
 const parsedCodes = computed(() =>
   codesInput.value
@@ -69,7 +85,7 @@ async function handleUpload() {
       showSubmitResult(result.isCorrect)
 
       if (result.completed) {
-        showChallengeCompleted()
+        showCompletedDialog.value = true
         break
       }
     }
@@ -81,12 +97,35 @@ async function handleUpload() {
     isUploading.value = false
   }
 }
+
+async function navigateToOrder(code: string) {
+  if (navigatingCode.value) return
+  navigatingCode.value = code
+
+  const maxRetries = 3
+  const delayMs = 1000
+
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      const order = await fetchOrderByTransactionCode(code)
+      await router.push({ name: 'order-detail', params: { id: order.id } })
+      return
+    } catch {
+      // Order may not be created yet — wait and retry
+      if (attempt < maxRetries - 1) {
+        await new Promise((r) => setTimeout(r, delayMs))
+      }
+    }
+  }
+
+  navigatingCode.value = null
+}
 </script>
 
 <template>
   <div class="space-y-5">
     <div v-if="challengeStore.isLoading" class="text-center text-muted-foreground">
-      Đang tải...
+      {{ t('common.loading') }}
     </div>
 
     <div
@@ -103,7 +142,7 @@ async function handleUpload() {
     <template v-else-if="challengeStore.today">
       <SectionCard
         :title="batchId"
-        description="Batch nhập mã giao dịch hôm nay"
+        :description="t('transactions.batchDescription')"
       >
         <div class="flex flex-wrap items-center justify-between gap-3">
           <StatusBadge
@@ -117,24 +156,24 @@ async function handleUpload() {
 
         <div class="mt-5 grid grid-cols-3 gap-3">
           <div class="rounded-xl border bg-muted/40 p-3 text-center">
-            <p class="text-xs text-muted-foreground">Total needed</p>
+            <p class="text-xs text-muted-foreground">{{ t('transactions.totalNeeded') }}</p>
             <p class="mt-1 text-2xl font-bold">{{ challengeStore.today.totalCodes }}</p>
           </div>
           <div class="rounded-xl border border-sky-200 bg-sky-50 p-3 text-center">
-            <p class="text-xs text-sky-600">Uploaded</p>
+            <p class="text-xs text-sky-600">{{ t('transactions.uploaded') }}</p>
             <p class="mt-1 text-2xl font-bold text-sky-700">
               {{ challengeStore.today.submitted }}
             </p>
           </div>
           <div class="rounded-xl border bg-muted/40 p-3 text-center">
-            <p class="text-xs text-muted-foreground">Remaining</p>
+            <p class="text-xs text-muted-foreground">{{ t('transactions.remaining') }}</p>
             <p class="mt-1 text-2xl font-bold">{{ remaining }}</p>
           </div>
         </div>
 
         <div class="mt-5 space-y-2">
           <div class="flex items-center justify-between text-sm">
-            <span class="text-muted-foreground">Progress</span>
+            <span class="text-muted-foreground">{{ t('transactions.progress') }}</span>
             <span class="font-medium">{{ challengeStore.progressPercent }}%</span>
           </div>
           <ProgressBar :percent="challengeStore.progressPercent" />
@@ -143,8 +182,8 @@ async function handleUpload() {
 
       <SectionCard
         v-if="!challengeStore.isCompleted"
-        title="1. Nhập mã giao dịch"
-        description="Dán danh sách mã, mỗi mã một dòng. Hệ thống sẽ upload tuần tự."
+        :title="t('transactions.inputTitle')"
+        :description="t('transactions.inputDescription')"
       >
         <div class="flex flex-row items-stretch gap-2 sm:flex-col sm:gap-4">
           <input
@@ -164,13 +203,13 @@ async function handleUpload() {
             <Loader2 v-if="isUploading" class="size-4 animate-spin" />
             <Upload v-else class="size-4" />
             <span class="sm:hidden">
-              {{ isUploading ? 'Đang gửi...' : `Gửi mã (${parsedCodes.length})` }}
+              {{ isUploading ? t('transactions.sendingMobile') : t('transactions.sendCodeMobile', { count: parsedCodes.length }) }}
             </span>
             <span class="hidden sm:inline">
               {{
                 isUploading
-                  ? 'Đang upload...'
-                  : `Upload mã (${parsedCodes.length})`
+                  ? t('transactions.uploadingDesktop')
+                  : t('transactions.uploadCodeDesktop', { count: parsedCodes.length })
               }}
             </span>
           </Button>
@@ -185,47 +224,115 @@ async function handleUpload() {
       </p>
 
       <SectionCard
-        title="2. Danh sách đã upload"
-        :description="`${challengeStore.today.correct} hợp lệ · ${challengeStore.today.wrong} không hợp lệ`"
+        :title="t('transactions.uploadedListTitle')"
+        :description="t('transactions.uploadedListDescription', { correct: challengeStore.today.correct, wrong: challengeStore.today.wrong })"
       >
         <div v-if="challengeStore.isLoadingResult" class="text-muted-foreground">
-          Đang tải...
+          {{ t('transactions.loadingResult') }}
         </div>
 
         <div
           v-else-if="!challengeStore.todayResult?.answers.length"
           class="rounded-xl border border-dashed p-8 text-center text-muted-foreground"
         >
-          Chưa có mã nào được upload
+          {{ t('transactions.noUploaded') }}
         </div>
 
         <div v-else class="space-y-2">
           <div
-            v-for="answer in challengeStore.todayResult!.answers"
+            v-for="(answer, index) in challengeStore.todayResult!.answers"
             :key="`${answer.order}-${answer.inputCode}`"
-            class="flex items-center justify-between rounded-xl border px-4 py-3"
+            :class="[
+              'flex items-center justify-between rounded-xl border px-4 py-3 transition-colors',
+              answer.isCorrect
+                ? 'cursor-pointer hover:border-primary/40 hover:bg-primary/5'
+                : '',
+            ]"
+            @click="answer.isCorrect && navigateToOrder(answer.inputCode)"
           >
-            <div>
-              <p class="font-mono text-sm font-semibold tracking-widest">
-                {{ answer.inputCode }}
-              </p>
-              <p class="text-xs text-muted-foreground">
-                {{ formatDisplayTime(answer.submittedAt) }}
-              </p>
+            <div class="flex items-center gap-3 min-w-0">
+              <span class="flex size-7 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-bold text-muted-foreground">
+                {{ index + 1 }}
+              </span>
+              <div class="min-w-0">
+                <p
+                  :class="[
+                    'font-mono text-sm font-semibold tracking-widest',
+                    answer.isCorrect ? 'text-primary underline decoration-primary/30 underline-offset-2' : '',
+                  ]"
+                >
+                  {{ answer.inputCode }}
+                </p>
+                <p class="text-xs text-muted-foreground">
+                  {{ formatDisplayTime(answer.submittedAt) }}
+                </p>
+              </div>
             </div>
-            <CheckCircle2
-              v-if="answer.isCorrect"
-              class="size-5 text-emerald-600"
-            />
-            <span
-              v-else
-              class="text-xs font-medium text-rose-600"
-            >
-              Invalid
-            </span>
+            <div class="flex items-center gap-2">
+              <Loader2
+                v-if="navigatingCode === answer.inputCode"
+                class="size-4 animate-spin text-primary"
+              />
+              <template v-else-if="answer.isCorrect">
+                <CheckCircle2 class="size-5 text-emerald-600" />
+                <ExternalLink class="size-3.5 text-muted-foreground" />
+              </template>
+              <span
+                v-else
+                class="text-xs font-medium text-rose-600"
+              >
+                {{ t('transactions.invalid') }}
+              </span>
+            </div>
           </div>
         </div>
       </SectionCard>
     </template>
   </div>
+
+  <Dialog v-model:open="showCompletedDialog">
+    <DialogContent class="sm:max-w-md">
+      <DialogHeader class="items-center text-center">
+        <div class="mx-auto mb-3 flex size-16 items-center justify-center rounded-full bg-sky-100">
+          <Info class="size-8 text-sky-600" />
+        </div>
+        <DialogTitle class="text-xl">
+          {{ t('transactions.completedDialogTitle') }}
+        </DialogTitle>
+        <DialogDescription>
+          {{ t('transactions.completedDialogDescription', { name: authStore.user?.name || '' }) }}
+        </DialogDescription>
+      </DialogHeader>
+
+      <div v-if="challengeStore.today" class="grid grid-cols-3 gap-3 py-4">
+        <div class="rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-center">
+          <p class="text-xs text-emerald-600">{{ t('transactions.uploaded') }}</p>
+          <p class="mt-1 text-xl font-bold text-emerald-700">{{ challengeStore.today.submitted }}</p>
+        </div>
+        <div class="rounded-xl border border-sky-200 bg-sky-50 p-3 text-center">
+          <p class="text-xs text-sky-600">{{ t('transactions.correctLabel') }}</p>
+          <p class="mt-1 text-xl font-bold text-sky-700">{{ challengeStore.today.correct }}</p>
+        </div>
+        <div class="rounded-xl border border-rose-200 bg-rose-50 p-3 text-center">
+          <p class="text-xs text-rose-600">{{ t('transactions.wrongLabel') }}</p>
+          <p class="mt-1 text-xl font-bold text-rose-700">{{ challengeStore.today.wrong }}</p>
+        </div>
+      </div>
+
+      <DialogFooter class="flex-col gap-2 sm:flex-col">
+        <Button class="w-full" @click="showCompletedDialog = false">
+          {{ t('transactions.completedDialogStay') }}
+        </Button>
+        <Button
+          variant="outline"
+          class="w-full"
+          as-child
+        >
+          <RouterLink :to="{ name: 'history' }" @click="showCompletedDialog = false">
+            {{ t('transactions.completedDialogHistory') }}
+          </RouterLink>
+        </Button>
+      </DialogFooter>
+    </DialogContent>
+  </Dialog>
 </template>

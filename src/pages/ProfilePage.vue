@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { onMounted, reactive, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { getErrorMessage, showRequestFailed, showSuccess } from '@/common'
 import SectionCard from '@/components/shared/SectionCard.vue'
 import { Button } from '@/components/ui/button'
@@ -12,6 +13,7 @@ import {
 import { useAuthStore } from '@/stores/auth'
 import { setStoredUser } from '@/common/utils/storage'
 
+const { t } = useI18n()
 const authStore = useAuthStore()
 const isLoading = ref(false)
 const isSaving = ref(false)
@@ -41,7 +43,7 @@ async function load() {
     authStore.user = profile
     setStoredUser(profile)
   } catch (error) {
-    showRequestFailed(getErrorMessage(error) || 'Không tải được profile')
+    showRequestFailed(getErrorMessage(error) || t('profile.loadFailed'))
   } finally {
     isLoading.value = false
   }
@@ -49,7 +51,7 @@ async function load() {
 
 async function handleSave() {
   if (!form.name.trim()) {
-    showRequestFailed('Vui lòng nhập họ tên')
+    showRequestFailed(t('profile.nameRequired'))
     return
   }
   isSaving.value = true
@@ -60,9 +62,9 @@ async function handleSave() {
     })
     authStore.user = updated
     setStoredUser(updated)
-    showSuccess('Đã cập nhật profile')
+    showSuccess(t('profile.profileUpdated'))
   } catch (error) {
-    showRequestFailed(getErrorMessage(error) || 'Cập nhật profile thất bại')
+    showRequestFailed(getErrorMessage(error) || t('profile.profileUpdateFailed'))
   } finally {
     isSaving.value = false
   }
@@ -70,11 +72,11 @@ async function handleSave() {
 
 async function handleChangePassword() {
   if (passwordForm.newPassword.length < 6) {
-    showRequestFailed('Mật khẩu mới tối thiểu 6 ký tự')
+    showRequestFailed(t('profile.passwordMinLength'))
     return
   }
   if (passwordForm.newPassword !== passwordForm.confirmPassword) {
-    showRequestFailed('Xác nhận mật khẩu không khớp')
+    showRequestFailed(t('profile.passwordMismatch'))
     return
   }
   isChangingPassword.value = true
@@ -86,9 +88,9 @@ async function handleChangePassword() {
     passwordForm.currentPassword = ''
     passwordForm.newPassword = ''
     passwordForm.confirmPassword = ''
-    showSuccess('Đã đổi mật khẩu')
+    showSuccess(t('profile.passwordChanged'))
   } catch (error) {
-    showRequestFailed(getErrorMessage(error) || 'Đổi mật khẩu thất bại')
+    showRequestFailed(getErrorMessage(error) || t('profile.passwordChangeFailed'))
   } finally {
     isChangingPassword.value = false
   }
@@ -101,37 +103,37 @@ onMounted(() => {
 
 <template>
   <div class="space-y-4">
-    <SectionCard title="Profile" description="Thông tin tài khoản Shop Owner">
-      <div v-if="isLoading" class="text-sm text-muted-foreground">Đang tải...</div>
+    <SectionCard :title="t('profile.title')" :description="t('profile.description')">
+      <div v-if="isLoading" class="text-sm text-muted-foreground">{{ t('common.loading') }}</div>
       <div v-else class="grid gap-3 sm:grid-cols-2">
         <div class="space-y-2">
-          <label class="text-sm font-medium">Họ tên</label>
+          <label class="text-sm font-medium">{{ t('profile.fullNameLabel') }}</label>
           <Input v-model="form.name" class="h-11" />
         </div>
         <div class="space-y-2">
-          <label class="text-sm font-medium">Email</label>
+          <label class="text-sm font-medium">{{ t('profile.emailLabel') }}</label>
           <Input v-model="form.email" class="h-11" disabled />
         </div>
         <div class="space-y-2">
-          <label class="text-sm font-medium">Staff code</label>
+          <label class="text-sm font-medium">{{ t('profile.staffCodeLabel') }}</label>
           <Input v-model="form.staffCode" class="h-11" disabled />
         </div>
         <div class="space-y-2">
-          <label class="text-sm font-medium">Avatar URL</label>
-          <Input v-model="form.avatar" class="h-11" placeholder="https://..." />
+          <label class="text-sm font-medium">{{ t('profile.avatarLabel') }}</label>
+          <Input v-model="form.avatar" class="h-11" :placeholder="t('profile.avatarPlaceholder')" />
         </div>
         <div class="sm:col-span-2">
           <Button :disabled="isSaving" @click="handleSave">
-            {{ isSaving ? 'Đang lưu...' : 'Lưu profile' }}
+            {{ isSaving ? t('profile.savingProfile') : t('profile.saveProfile') }}
           </Button>
         </div>
       </div>
     </SectionCard>
 
-    <SectionCard title="Đổi mật khẩu">
+    <SectionCard :title="t('profile.changePasswordTitle')">
       <div class="grid gap-3 sm:grid-cols-2">
         <div class="space-y-2 sm:col-span-2">
-          <label class="text-sm font-medium">Mật khẩu hiện tại</label>
+          <label class="text-sm font-medium">{{ t('profile.currentPasswordLabel') }}</label>
           <Input
             v-model="passwordForm.currentPassword"
             type="password"
@@ -139,7 +141,7 @@ onMounted(() => {
           />
         </div>
         <div class="space-y-2">
-          <label class="text-sm font-medium">Mật khẩu mới</label>
+          <label class="text-sm font-medium">{{ t('profile.newPasswordLabel') }}</label>
           <Input
             v-model="passwordForm.newPassword"
             type="password"
@@ -147,7 +149,7 @@ onMounted(() => {
           />
         </div>
         <div class="space-y-2">
-          <label class="text-sm font-medium">Xác nhận mật khẩu mới</label>
+          <label class="text-sm font-medium">{{ t('profile.confirmPasswordLabel') }}</label>
           <Input
             v-model="passwordForm.confirmPassword"
             type="password"
@@ -160,7 +162,7 @@ onMounted(() => {
             variant="outline"
             @click="handleChangePassword"
           >
-            {{ isChangingPassword ? 'Đang đổi...' : 'Đổi mật khẩu' }}
+            {{ isChangingPassword ? t('profile.changingPassword') : t('profile.changePasswordButton') }}
           </Button>
         </div>
       </div>

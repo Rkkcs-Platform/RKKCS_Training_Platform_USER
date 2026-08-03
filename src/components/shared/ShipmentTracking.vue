@@ -1,5 +1,7 @@
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n'
 import { formatDisplayDate, formatDisplayTime } from '@/common'
+import { useCleanText } from '@/common/utils/format'
 import StatusBadge from '@/components/shared/StatusBadge.vue'
 import TrackingMap from '@/components/shared/TrackingMap.vue'
 import { cn } from '@/lib/utils'
@@ -19,10 +21,24 @@ defineProps<{
   mapHeightClass?: string
 }>()
 
-const statusLabel: Record<ShipmentStatus, string> = {
-  pending: 'Chờ lấy hàng',
-  in_transit: 'Đang vận chuyển',
-  delivered: 'Đã giao hàng',
+const { t } = useI18n()
+const cleanText = useCleanText()
+
+const statusLabelKeys: Record<ShipmentStatus, string> = {
+  pending: 'shipments.statusPending',
+  in_transit: 'shipments.statusInTransit',
+  delivered: 'shipments.statusDelivered',
+}
+
+const timelineLabelKeys: Record<string, string> = {
+  pending: 'shipments.timelinePending',
+  in_transit: 'shipments.timelineInTransit',
+  delivered: 'shipments.timelineDelivered',
+}
+
+function getTimelineLabel(step: ShipmentTimelineStep) {
+  const key = timelineLabelKeys[step.key || '']
+  return key ? t(key) : step.label
 }
 </script>
 
@@ -30,33 +46,26 @@ const statusLabel: Record<ShipmentStatus, string> = {
   <div class="space-y-5">
     <div class="flex flex-wrap items-center justify-between gap-3 rounded-xl border bg-muted/30 p-4">
       <div>
-        <p class="text-xs text-muted-foreground">Trạng thái vận chuyển</p>
+        <p class="text-xs text-muted-foreground">{{ t('shipments.shippingStatus') }}</p>
         <p class="mt-1 text-lg font-semibold">
-          {{ statusLabel[status] || status }}
+          {{ t(statusLabelKeys[status]) || status }}
         </p>
         <p v-if="currentLocation" class="mt-1 text-sm text-muted-foreground">
-          Vị trí: {{ currentLocation }}
+          {{ t('shipments.position') }}: {{ cleanText(currentLocation) }}
         </p>
       </div>
       <StatusBadge :status="status" />
     </div>
 
     <div v-if="map?.current?.lat && map?.destination?.lat">
-      <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
-        <p class="text-sm font-medium">Bản đồ tracking</p>
-        <p class="text-xs text-muted-foreground">
-          {{
-            map.isMock === false
-              ? 'Ghim theo địa chỉ đường/số nhà (Nominatim)'
-              : 'Ước lượng theo thành phố — nhập địa chỉ chi tiết để chính xác hơn'
-          }}
-        </p>
+      <div class="mb-3">
+        <p class="text-sm font-medium">{{ t('shipments.mapTitle') }}</p>
       </div>
       <TrackingMap :map="map" :height-class="mapHeightClass" />
     </div>
 
     <div v-if="timeline?.length">
-      <p class="mb-3 text-sm font-medium">Tiến trình</p>
+      <p class="mb-3 text-sm font-medium">{{ t('shipments.progressTitle') }}</p>
       <div class="space-y-0">
         <div
           v-for="(step, index) in timeline"
@@ -94,7 +103,7 @@ const statusLabel: Record<ShipmentStatus, string> = {
                 )
               "
             >
-              {{ step.label }}
+              {{ getTimelineLabel(step) }}
             </p>
           </div>
         </div>
@@ -102,7 +111,7 @@ const statusLabel: Record<ShipmentStatus, string> = {
     </div>
 
     <div v-if="events?.length">
-      <p class="mb-3 text-sm font-medium">Lịch sử tracking</p>
+      <p class="mb-3 text-sm font-medium">{{ t('shipments.trackingHistoryTitle') }}</p>
       <div class="space-y-3">
         <div
           v-for="event in [...events].reverse()"
@@ -112,13 +121,13 @@ const statusLabel: Record<ShipmentStatus, string> = {
           <div class="flex items-start justify-between gap-3">
             <div class="min-w-0">
               <p class="font-medium">
-                {{ event.note || statusLabel[event.status] || event.status }}
+                {{ cleanText(event.note) || t(statusLabelKeys[event.status]) || event.status }}
               </p>
               <p
                 v-if="event.location"
                 class="mt-1 text-sm text-muted-foreground"
               >
-                {{ event.location }}
+                {{ cleanText(event.location) }}
               </p>
             </div>
             <StatusBadge :status="event.status" class="shrink-0" />

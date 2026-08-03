@@ -1,22 +1,19 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
 import { formatDisplayDate, showRequestFailed } from '@/common'
+import { useFormatCurrency } from '@/common/utils/format'
 import StatusBadge from '@/components/shared/StatusBadge.vue'
 import { Card, CardContent } from '@/components/ui/card'
 import { fetchPayments } from '@/services/order.service'
 import type { PaymentListItem } from '@/types/order'
 
+const { t } = useI18n()
 const items = ref<PaymentListItem[]>([])
 const isLoading = ref(false)
 
-function formatCurrency(amount: number) {
-  return new Intl.NumberFormat('vi-VN', {
-    style: 'currency',
-    currency: 'VND',
-    maximumFractionDigits: 0,
-  }).format(amount)
-}
+const formatCurrency = useFormatCurrency()
 
 onMounted(async () => {
   isLoading.value = true
@@ -24,7 +21,7 @@ onMounted(async () => {
     const data = await fetchPayments({ page: 1, limit: 100 })
     items.value = data.items ?? []
   } catch {
-    showRequestFailed('Không tải được danh sách thanh toán')
+    showRequestFailed(t('payments.loadFailed'))
   } finally {
     isLoading.value = false
   }
@@ -34,7 +31,7 @@ onMounted(async () => {
 <template>
   <div class="space-y-5">
     <div v-if="isLoading" class="text-muted-foreground">
-      Đang tải thanh toán...
+      {{ t('payments.loadingPayments') }}
     </div>
 
     <template v-else>
@@ -72,7 +69,7 @@ onMounted(async () => {
         v-if="!items.length"
         class="rounded-xl border border-dashed p-8 text-center text-muted-foreground"
       >
-        Chưa có thanh toán
+        {{ t('payments.noPayments') }}
       </p>
     </template>
   </div>

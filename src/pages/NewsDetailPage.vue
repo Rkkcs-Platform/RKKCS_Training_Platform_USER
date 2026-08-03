@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import { onMounted, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { getErrorMessage, showRequestFailed } from '@/common'
 import SectionCard from '@/components/shared/SectionCard.vue'
 import { Button } from '@/components/ui/button'
 import { fetchNewsBySlug, type NewsItem } from '@/services/phase5.service'
 
+const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const isLoading = ref(false)
@@ -22,7 +24,7 @@ async function load(slug: string) {
   try {
     item.value = await fetchNewsBySlug(slug)
   } catch (error) {
-    showRequestFailed(getErrorMessage(error) || 'Không tải được bài viết')
+    showRequestFailed(getErrorMessage(error) || t('news.loadDetailFailed'))
   } finally {
     isLoading.value = false
   }
@@ -44,14 +46,14 @@ onMounted(() => {
 <template>
   <div class="space-y-4">
     <Button variant="outline" size="sm" @click="router.push({ name: 'news' })">
-      ← Quay lại News
+      {{ t('news.backToNews') }}
     </Button>
 
     <SectionCard
-      :title="item?.title || 'Chi tiết tin'"
+      :title="item?.title || t('news.detailTitle')"
       :description="item ? formatDate(item.publishedAt || item.createdAt) : ''"
     >
-      <div v-if="isLoading" class="text-sm text-muted-foreground">Đang tải...</div>
+      <div v-if="isLoading" class="text-sm text-muted-foreground">{{ t('common.loading') }}</div>
       <div v-else-if="item" class="space-y-4">
         <p class="text-muted-foreground">{{ item.summary }}</p>
         <div class="whitespace-pre-wrap text-sm leading-relaxed">

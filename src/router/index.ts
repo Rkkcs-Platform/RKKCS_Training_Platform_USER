@@ -115,14 +115,50 @@ const router = createRouter({
       ],
     },
     {
+      path: '/maintenance',
+      name: 'maintenance',
+      component: () => import('@/pages/MaintenancePage.vue'),
+    },
+    {
       path: '/:pathMatch(.*)*',
       redirect: { name: 'dashboard' },
     },
   ],
 })
 
-router.beforeEach((to) => {
+router.beforeEach(async (to) => {
   const authStore = useAuthStore()
+
+  // Skip maintenance check for maintenance page itself and login
+  if (to.name !== 'maintenance' && to.name !== 'login') {
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api/v1'}/setting/maintenance`,
+      )
+      const data = await res.json()
+      if (data.maintenance) {
+        return { name: 'maintenance' }
+      }
+    } catch {
+      // API down — don't block navigation
+    }
+  }
+
+  // If on maintenance page but maintenance is off, redirect to dashboard
+  if (to.name === 'maintenance') {
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api/v1'}/setting/maintenance`,
+      )
+      const data = await res.json()
+      if (!data.maintenance) {
+        return { name: 'dashboard' }
+      }
+    } catch {
+      // API down — stay on maintenance
+    }
+    return true
+  }
 
   if (routeRequiresAuth(to) && !authStore.isAuthenticated) {
     return {

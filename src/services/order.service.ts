@@ -36,6 +36,11 @@ export async function fetchOrderById(id: string) {
   return data
 }
 
+export async function fetchOrderByTransactionCode(code: string) {
+  const { data } = await api.get<OrderDetail>(`/orders/by-code/${encodeURIComponent(code)}`)
+  return data
+}
+
 export async function updateOrder(id: string, payload: UpdateOrderPayload) {
   const { data } = await api.patch<OrderDetail>(`/orders/${id}`, payload)
   return data

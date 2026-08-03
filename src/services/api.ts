@@ -8,6 +8,7 @@ import {
   getRefreshToken,
   setTokens,
 } from '@/common/utils/storage'
+import i18n from '@/i18n'
 
 const baseURL = import.meta.env.VITE_API_URL ?? 'http://localhost:3000/api/v1'
 
@@ -54,6 +55,9 @@ api.interceptors.request.use((config) => {
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
   }
+
+  // Send current locale to API for i18n responses
+  config.headers['Accept-Language'] = i18n.global.locale.value
 
   return config
 })

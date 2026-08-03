@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
 import { showRequestFailed } from '@/common'
+import { useFormatCurrency } from '@/common/utils/format'
 import KpiCard from '@/components/shared/KpiCard.vue'
 import SectionCard from '@/components/shared/SectionCard.vue'
 import StatusBadge from '@/components/shared/StatusBadge.vue'
@@ -10,6 +12,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { fetchDashboard } from '@/services/order.service'
 import type { ShopDashboard } from '@/types/order'
 
+const { t } = useI18n()
 const isLoading = ref(false)
 const data = ref<ShopDashboard | null>(null)
 
@@ -18,13 +21,7 @@ const maxRevenue = computed(() => {
   return Math.max(...amounts, 1)
 })
 
-function formatCurrency(amount: number) {
-  return new Intl.NumberFormat('vi-VN', {
-    style: 'currency',
-    currency: 'VND',
-    maximumFractionDigits: 0,
-  }).format(amount)
-}
+const formatCurrency = useFormatCurrency()
 
 function formatKpiValue(kpi: ShopDashboard['kpis'][number]) {
   if (kpi.isCurrency) return formatCurrency(kpi.value)
@@ -36,7 +33,7 @@ onMounted(async () => {
   try {
     data.value = await fetchDashboard()
   } catch {
-    showRequestFailed('Không tải được dashboard')
+    showRequestFailed(t('dashboard.loadFailed'))
   } finally {
     isLoading.value = false
   }
@@ -46,7 +43,7 @@ onMounted(async () => {
 <template>
   <div class="space-y-5">
     <div v-if="isLoading" class="text-muted-foreground">
-      Đang tải dashboard...
+      {{ t('dashboard.loadingDashboard') }}
     </div>
 
     <template v-else-if="data">
@@ -74,7 +71,7 @@ onMounted(async () => {
       </div>
 
       <div class="grid gap-5 lg:grid-cols-2">
-        <SectionCard title="Doanh thu (7 ngày gần nhất)">
+        <SectionCard :title="t('dashboard.revenueTitle')">
           <div class="flex h-40 items-end gap-2">
             <div
               v-for="point in data.revenueTrend"
@@ -95,12 +92,12 @@ onMounted(async () => {
           </div>
         </SectionCard>
 
-        <SectionCard title="Đơn hàng mới nhất">
+        <SectionCard :title="t('dashboard.recentOrdersTitle')">
           <div
             v-if="!data.recentOrders.length"
             class="rounded-xl border border-dashed p-6 text-center text-sm text-muted-foreground"
           >
-            Chưa có đơn hàng
+            {{ t('dashboard.noOrders') }}
           </div>
           <div v-else class="space-y-3">
             <RouterLink
@@ -120,18 +117,18 @@ onMounted(async () => {
             </RouterLink>
           </div>
           <Button as-child variant="outline" class="mt-4 w-full">
-            <RouterLink :to="{ name: 'orders' }">Xem tất cả đơn hàng</RouterLink>
+            <RouterLink :to="{ name: 'orders' }">{{ t('dashboard.viewAllOrders') }}</RouterLink>
           </Button>
         </SectionCard>
       </div>
     </template>
 
     <SectionCard
-      title="Bắt đầu nhập mã"
-      description="Transaction Center là module nhập mã giao dịch hàng ngày — đã sẵn sàng sử dụng."
+      :title="t('dashboard.startCodeTitle')"
+      :description="t('dashboard.startCodeDescription')"
     >
       <Button as-child>
-        <RouterLink :to="{ name: 'transactions' }">Mở Transaction Center</RouterLink>
+        <RouterLink :to="{ name: 'transactions' }">{{ t('dashboard.openTransactionCenter') }}</RouterLink>
       </Button>
     </SectionCard>
   </div>

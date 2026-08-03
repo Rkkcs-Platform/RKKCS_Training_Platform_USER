@@ -1,5 +1,7 @@
 import { toast, type ExternalToast } from 'vue-sonner'
-import { TOAST_MESSAGES } from '../constants/messages'
+import i18n from '@/i18n'
+
+const { t } = i18n.global
 
 const DEFAULT_TOAST_OPTIONS: ExternalToast = {
   duration: 3000,
@@ -22,54 +24,54 @@ export function showWarning(message: string) {
 }
 
 export function showLoginSuccess() {
-  showSuccess(TOAST_MESSAGES.auth.loginSuccess)
+  showSuccess(t('auth.loginSuccess'))
 }
 
 export function showLoginFailed(message?: string) {
-  showError(message ?? TOAST_MESSAGES.auth.loginFailed)
+  showError(message ?? t('auth.loginFailed'))
 }
 
 export function showMissingCredentials() {
-  showError(TOAST_MESSAGES.auth.missingCredentials)
+  showError(t('auth.missingCredentials'))
 }
 
 export function showLogoutSuccess() {
-  showSuccess(TOAST_MESSAGES.auth.logoutSuccess)
+  showSuccess(t('auth.logoutSuccess'))
 }
 
 export function showSessionExpired() {
-  showError(TOAST_MESSAGES.auth.sessionExpired)
+  showError(t('auth.sessionExpired'))
 }
 
 export function showChallengeLoadFailed() {
-  showError(TOAST_MESSAGES.challenge.loadFailed)
+  showError(t('challenge.loadFailed'))
 }
 
 export function showSubmitFailed(message?: string) {
-  showError(message ?? TOAST_MESSAGES.challenge.submitFailed)
+  showError(message ?? t('challenge.submitFailed'))
 }
 
 export function showSubmitResult(isCorrect: boolean) {
   if (isCorrect) {
-    showSuccess(TOAST_MESSAGES.challenge.correct)
+    showSuccess(t('challenge.correct'))
     return
   }
 
-  showError(TOAST_MESSAGES.challenge.wrong)
+  showError(t('challenge.wrong'))
 }
 
 export function showChallengeCompleted() {
-  showSuccess(TOAST_MESSAGES.challenge.completed)
+  showSuccess(t('challenge.completed'))
 }
 
 export function showHistoryLoadFailed() {
-  showError(TOAST_MESSAGES.history.loadFailed)
+  showError(t('history.loadFailed'))
 }
 
 export function showHistoryDetailFailed() {
-  showError(TOAST_MESSAGES.history.detailFailed)
+  showError(t('history.detailFailed'))
 }
 
 export function showRequestFailed(message?: string) {
-  showError(message ?? TOAST_MESSAGES.common.requestFailed)
+  showError(message ?? t('common.requestFailed'))
 }

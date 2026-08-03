@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { RouterLink } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import type { OrderListItem } from '@/types/order'
 import { formatDisplayDate, formatDisplayTime } from '@/common'
+import { useFormatCurrency } from '@/common/utils/format'
 import StatusBadge from '@/components/shared/StatusBadge.vue'
 import { Card, CardContent } from '@/components/ui/card'
 
@@ -9,18 +11,14 @@ defineProps<{
   order: OrderListItem
 }>()
 
-function formatCurrency(amount: number) {
-  return new Intl.NumberFormat('vi-VN', {
-    style: 'currency',
-    currency: 'VND',
-    maximumFractionDigits: 0,
-  }).format(amount)
-}
+const { t } = useI18n()
+
+const formatCurrency = useFormatCurrency()
 
 function customerLabel(order: OrderListItem) {
   const name = order.customer.fullName?.trim()
   if (!name || /^chưa cập nhật$/i.test(name) || /^customer\s+/i.test(name)) {
-    return 'Chưa cập nhật người đặt'
+    return t('orderList.customerNotUpdated')
   }
   return name
 }
@@ -43,12 +41,12 @@ function customerLabel(order: OrderListItem) {
           </div>
           <div class="mt-3 flex items-center justify-between gap-3 text-sm">
             <span class="truncate text-muted-foreground">
-              Người đặt: {{ customerLabel(order) }}
+              {{ t('orderList.customerLabel') }}: {{ customerLabel(order) }}
             </span>
             <span class="shrink-0 font-semibold">{{ formatCurrency(order.amount) }}</span>
           </div>
           <p class="mt-1 truncate text-xs text-muted-foreground">
-            Mã GD: {{ order.transactionCode }}
+            {{ t('orderList.transactionCodeShort') }}: {{ order.transactionCode }}
           </p>
         </div>
       </CardContent>

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import {
   formatDisplayDate,
   formatDisplayTime,
@@ -25,6 +26,7 @@ import {
 import { cn } from '@/lib/utils'
 import { useHistoryStore } from '@/stores/history'
 
+const { t } = useI18n()
 const historyStore = useHistoryStore()
 
 onMounted(async () => {
@@ -48,21 +50,21 @@ async function handleSelectDate(date: string) {
   <div class="space-y-5">
     <Card>
       <CardHeader>
-        <CardTitle>Lịch sử theo ngày</CardTitle>
+        <CardTitle>{{ t('history.title') }}</CardTitle>
         <CardDescription>
-          Chọn một ngày để xem danh sách mã bạn đã nhập
+          {{ t('history.description') }}
         </CardDescription>
       </CardHeader>
       <CardContent>
         <div v-if="historyStore.isLoadingList" class="text-muted-foreground">
-          Đang tải...
+          {{ t('common.loading') }}
         </div>
 
         <div
           v-else-if="historyStore.items.length === 0"
           class="rounded-xl border border-dashed p-8 text-center text-muted-foreground"
         >
-          Chưa có lịch sử nhập mã
+          {{ t('history.noHistory') }}
         </div>
 
         <template v-else>
@@ -84,11 +86,11 @@ async function handleSelectDate(date: string) {
             <div class="flex items-center justify-between gap-2">
               <p class="font-semibold">{{ formatDisplayDate(item.date) }}</p>
               <Badge :variant="item.status === 'completed' ? 'default' : 'secondary'">
-                {{ item.status === 'completed' ? 'Hoàn thành' : 'Đang xử lý' }}
+                {{ item.status === 'completed' ? t('history.completed') : t('history.processing') }}
               </Badge>
             </div>
             <p class="mt-2 text-sm text-muted-foreground">
-              Mã đúng {{ item.correct }} · Mã sai {{ item.wrong }} · {{ item.accuracy }}%
+              {{ t('history.correctCodes', { count: item.correct }) }} · {{ t('history.wrongCodes', { count: item.wrong }) }} · {{ item.accuracy }}%
             </p>
           </button>
         </div>
@@ -97,11 +99,11 @@ async function handleSelectDate(date: string) {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Ngày</TableHead>
-                <TableHead>Đúng</TableHead>
-                <TableHead>Sai</TableHead>
-                <TableHead>Accuracy</TableHead>
-                <TableHead>Trạng thái</TableHead>
+                <TableHead>{{ t('history.dateHeader') }}</TableHead>
+                <TableHead>{{ t('history.correctHeader') }}</TableHead>
+                <TableHead>{{ t('history.wrongHeader') }}</TableHead>
+                <TableHead>{{ t('history.accuracyHeader') }}</TableHead>
+                <TableHead>{{ t('history.statusHeader') }}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -124,7 +126,7 @@ async function handleSelectDate(date: string) {
                 <TableCell>{{ item.accuracy }}%</TableCell>
                 <TableCell>
                   <Badge :variant="item.status === 'completed' ? 'default' : 'secondary'">
-                    {{ item.status === 'completed' ? 'Hoàn thành' : 'Thiếu mã' }}
+                    {{ item.status === 'completed' ? t('history.completed') : t('history.missingCodes') }}
                   </Badge>
                 </TableCell>
               </TableRow>
@@ -138,23 +140,22 @@ async function handleSelectDate(date: string) {
     <Card v-if="historyStore.selectedDate">
       <CardHeader>
         <CardTitle>
-          Mã đã nhập — {{ formatDisplayDate(historyStore.selectedDate) }}
+          {{ t('history.detailTitle', { date: formatDisplayDate(historyStore.selectedDate) }) }}
         </CardTitle>
         <CardDescription v-if="historyStore.detail">
-          {{ historyStore.detail.submitted }} mã · Hợp lệ {{ historyStore.detail.correct }} · Không hợp lệ
-          {{ historyStore.detail.wrong }}
+          {{ t('history.detailDescription', { submitted: historyStore.detail.submitted, correct: historyStore.detail.correct, wrong: historyStore.detail.wrong }) }}
         </CardDescription>
       </CardHeader>
       <CardContent>
         <div v-if="historyStore.isLoadingDetail" class="text-muted-foreground">
-          Đang tải chi tiết...
+          {{ t('common.loadingDetail') }}
         </div>
 
         <div
           v-else-if="!historyStore.detail?.answers.length"
           class="rounded-xl border border-dashed p-6 text-center text-muted-foreground"
         >
-          Chưa nhập mã nào trong ngày này
+          {{ t('history.noCodesForDay') }}
         </div>
 
         <template v-else>
@@ -173,7 +174,7 @@ async function handleSelectDate(date: string) {
               </p>
             </div>
             <Badge :variant="answer.isCorrect ? 'default' : 'destructive'">
-              {{ answer.isCorrect ? 'Hợp lệ' : 'không hợp lệ' }}
+              {{ answer.isCorrect ? t('history.valid') : t('history.invalidShort') }}
             </Badge>
           </div>
         </div>
@@ -183,9 +184,9 @@ async function handleSelectDate(date: string) {
             <TableHeader>
               <TableRow>
                 <TableHead>#</TableHead>
-                <TableHead>Mã đã nhập</TableHead>
-                <TableHead>Kết quả</TableHead>
-                <TableHead>Thời gian</TableHead>
+                <TableHead>{{ t('history.codeHeader') }}</TableHead>
+                <TableHead>{{ t('history.resultHeader') }}</TableHead>
+                <TableHead>{{ t('history.timeHeader') }}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -199,7 +200,7 @@ async function handleSelectDate(date: string) {
                 </TableCell>
                 <TableCell>
                   <Badge :variant="answer.isCorrect ? 'default' : 'destructive'">
-                    {{ answer.isCorrect ? 'Mã hợp lệ' : 'Không tìm thấy mã' }}
+                    {{ answer.isCorrect ? t('history.validFull') : t('history.invalidFull') }}
                   </Badge>
                 </TableCell>
                 <TableCell>{{ formatDisplayTime(answer.submittedAt) }}</TableCell>

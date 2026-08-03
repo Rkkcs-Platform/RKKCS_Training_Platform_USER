@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ChevronRight } from 'lucide-vue-next'
+import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
 import type { NavItem } from '@/common/constants/navigation'
 import { Badge } from '@/components/ui/badge'
@@ -9,6 +10,8 @@ defineProps<{
   item: NavItem
   active?: boolean
 }>()
+
+const { t } = useI18n()
 </script>
 
 <template>
@@ -25,7 +28,7 @@ defineProps<{
     "
   >
     <component :is="item.icon" class="size-5 shrink-0" />
-    <span class="flex-1 text-sm font-medium">{{ item.label }}</span>
+    <span class="flex-1 text-sm font-medium">{{ t(item.labelKey) }}</span>
     <Badge
       v-if="item.comingSoon"
       variant="secondary"
