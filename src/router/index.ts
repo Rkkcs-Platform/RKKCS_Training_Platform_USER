@@ -133,7 +133,7 @@ router.beforeEach(async (to) => {
   if (to.name !== 'maintenance' && to.name !== 'login') {
     try {
       const res = await fetch(
-        `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api/v1'}/setting/maintenance`,
+        `${import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1'}/setting/maintenance`,
       )
       const data = await res.json()
       if (data.maintenance) {
@@ -148,7 +148,7 @@ router.beforeEach(async (to) => {
   if (to.name === 'maintenance') {
     try {
       const res = await fetch(
-        `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api/v1'}/setting/maintenance`,
+        `${import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1'}/setting/maintenance`,
       )
       const data = await res.json()
       if (!data.maintenance) {

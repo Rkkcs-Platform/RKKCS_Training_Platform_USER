@@ -15,7 +15,7 @@ const isChecking = ref(false)
 async function handleRetry() {
   isChecking.value = true
   try {
-    const res = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api/v1'}/setting/maintenance`)
+    const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1'}/setting/maintenance`)
     const data = await res.json()
     if (!data.maintenance) {
       await router.replace({ name: 'dashboard' })
