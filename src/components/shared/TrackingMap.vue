@@ -16,12 +16,22 @@ let leafletMap: L.Map | null = null
 let layerGroup: L.LayerGroup | null = null
 
 function renderMap() {
-  if (!container.value || !props.map?.current?.lat || !props.map?.destination?.lat) {
+  if (
+    !container.value ||
+    !props.map?.current?.lat ||
+    !props.map?.current?.lng ||
+    !props.map?.destination?.lat ||
+    !props.map?.destination?.lng
+  ) {
     return
   }
 
-  const current = props.map.current
-  const dest = props.map.destination
+  const currentLat: number = props.map.current.lat
+  const currentLng: number = props.map.current.lng
+  const destLat: number = props.map.destination.lat
+  const destLng: number = props.map.destination.lng
+  const currentLabel = props.map.current.label
+  const destLabel = props.map.destination.label
 
   if (!leafletMap) {
     leafletMap = L.map(container.value, {
@@ -53,22 +63,22 @@ function renderMap() {
     iconAnchor: [7, 7],
   })
 
-  const currentMarker = L.marker([current.lat, current.lng], {
+  const currentMarker = L.marker([currentLat, currentLng], {
     icon: currentIcon,
   }).bindPopup(
-    `<strong>${current.label || t('trackingMap.currentPosition')}</strong>`,
+    `<strong>${currentLabel || t('trackingMap.currentPosition')}</strong>`,
   )
 
-  const destMarker = L.marker([dest.lat, dest.lng], {
+  const destMarker = L.marker([destLat, destLng], {
     icon: destIcon,
   }).bindPopup(
-    `<strong>${dest.label || t('trackingMap.deliveryPoint')}</strong>`,
+    `<strong>${destLabel || t('trackingMap.deliveryPoint')}</strong>`,
   )
 
   const line = L.polyline(
     [
-      [current.lat, current.lng],
-      [dest.lat, dest.lng],
+      [currentLat, currentLng],
+      [destLat, destLng],
     ],
     {
       color: '#2563eb',
@@ -84,8 +94,8 @@ function renderMap() {
 
   leafletMap.fitBounds(
     L.latLngBounds(
-      [current.lat, current.lng],
-      [dest.lat, dest.lng],
+      [currentLat, currentLng],
+      [destLat, destLng],
     ).pad(0.35),
   )
 

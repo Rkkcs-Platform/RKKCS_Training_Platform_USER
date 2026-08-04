@@ -4,7 +4,7 @@ import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
 import { formatDisplayDate, showRequestFailed } from '@/common'
 import { useFormatCurrency } from '@/common/utils/format'
-import StatusBadge from '@/components/shared/StatusBadge.vue'
+
 import { Card, CardContent } from '@/components/ui/card'
 import { fetchCustomers } from '@/services/order.service'
 import type { CustomerListItem } from '@/types/order'
