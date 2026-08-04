@@ -1,0 +1,76 @@
+<script setup lang="ts">
+import { onMounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { RouterLink } from 'vue-router'
+import { formatDisplayDate, showRequestFailed } from '@/common'
+import { useFormatCurrency } from '@/common/utils/format'
+import StatusBadge from '@/components/shared/StatusBadge.vue'
+import { Card, CardContent } from '@/components/ui/card'
+import { fetchPayments } from '@/services/order.service'
+import type { PaymentListItem } from '@/types/order'
+
+const { t } = useI18n()
+const items = ref<PaymentListItem[]>([])
+const isLoading = ref(false)
+
+const formatCurrency = useFormatCurrency()
+
+onMounted(async () => {
+  isLoading.value = true
+  try {
+    const data = await fetchPayments({ page: 1, limit: 100 })
+    items.value = data.items ?? []
+  } catch {
+    showRequestFailed(t('payments.loadFailed'))
+  } finally {
+    isLoading.value = false
+  }
+})
+</script>
+
+<template>
+  <div class="space-y-5">
+    <div v-if="isLoading" class="text-muted-foreground">
+      {{ t('payments.loadingPayments') }}
+    </div>
+
+    <template v-else>
+      <div class="space-y-3">
+        <RouterLink
+          v-for="payment in items"
+          :key="payment.id"
+          :to="{ name: 'order-detail', params: { id: payment.orderId } }"
+        >
+          <Card class="shadow-sm transition hover:border-primary/30">
+            <CardContent class="flex items-center justify-between gap-4 p-4">
+              <div class="min-w-0">
+                <p class="font-semibold">{{ payment.paymentCode }}</p>
+                <p class="mt-1 text-sm text-muted-foreground">
+                  {{ payment.orderCode || payment.orderId }}
+                  · {{ payment.method || '—' }}
+                </p>
+                <p
+                  v-if="payment.createdAt"
+                  class="mt-1 text-xs text-muted-foreground"
+                >
+                  {{ formatDisplayDate(payment.createdAt) }}
+                </p>
+              </div>
+              <div class="text-right">
+                <p class="font-semibold">{{ formatCurrency(payment.amount) }}</p>
+                <StatusBadge :status="payment.status" class="mt-1" />
+              </div>
+            </CardContent>
+          </Card>
+        </RouterLink>
+      </div>
+
+      <p
+        v-if="!items.length"
+        class="rounded-xl border border-dashed p-8 text-center text-muted-foreground"
+      >
+        {{ t('payments.noPayments') }}
+      </p>
+    </template>
+  </div>
+</template>

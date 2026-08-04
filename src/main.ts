@@ -3,6 +3,7 @@ import { createPinia } from 'pinia'
 import 'vue-sonner/style.css'
 import App from './App.vue'
 import router from './router'
+import i18n from '@/i18n'
 import { setAppMounted } from '@/services/api'
 import { useAuthStore } from '@/stores/auth'
 import './style.css'
@@ -12,6 +13,7 @@ async function bootstrapApp() {
   const pinia = createPinia()
 
   app.use(pinia)
+  app.use(i18n)
 
   const authStore = useAuthStore(pinia)
   authStore.hydrateFromStorage()
