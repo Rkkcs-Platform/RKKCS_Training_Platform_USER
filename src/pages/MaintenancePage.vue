@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import vi from '@/i18n/locales/vi'
 import en from '@/i18n/locales/en'
 import ja from '@/i18n/locales/ja'
+import { setLocale, type AppLocale } from '@/i18n'
 
 const { t } = useI18n()
 const router = useRouter()
@@ -17,6 +18,9 @@ async function handleRetry() {
   try {
     const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1'}/setting/maintenance`)
     const data = await res.json()
+    if (data.language && !sessionStorage.getItem('rkkcs-lang-initialized')) {
+      setLocale(data.language as AppLocale)
+    }
     if (!data.maintenance) {
       await router.replace({ name: 'dashboard' })
     }

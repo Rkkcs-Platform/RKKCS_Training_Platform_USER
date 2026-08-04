@@ -4,6 +4,7 @@ import {
   type RouteLocationNormalized,
 } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { setLocale, type AppLocale } from '@/i18n'
 
 function routeRequiresAuth(to: RouteLocationNormalized) {
   return to.matched.some((record) => record.meta.requiresAuth)
@@ -136,6 +137,9 @@ router.beforeEach(async (to) => {
         `${import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1'}/setting/maintenance`,
       )
       const data = await res.json()
+      if (data.language && !sessionStorage.getItem('rkkcs-lang-initialized')) {
+        setLocale(data.language as AppLocale)
+      }
       if (data.maintenance) {
         return { name: 'maintenance' }
       }
@@ -151,6 +155,9 @@ router.beforeEach(async (to) => {
         `${import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1'}/setting/maintenance`,
       )
       const data = await res.json()
+      if (data.language && !sessionStorage.getItem('rkkcs-lang-initialized')) {
+        setLocale(data.language as AppLocale)
+      }
       if (!data.maintenance) {
         return { name: 'dashboard' }
       }

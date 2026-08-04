@@ -32,8 +32,9 @@ export function setLocale(locale: AppLocale) {
   i18n.global.locale.value = locale
   try {
     localStorage.setItem(STORAGE_KEY, locale)
+    sessionStorage.setItem('rkkcs-lang-initialized', 'true')
   } catch {
-    // localStorage unavailable
+    // storage unavailable
   }
   document.documentElement.lang = locale
 }
