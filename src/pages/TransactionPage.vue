@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
-import { CheckCircle2, ExternalLink, Info, Loader2, Upload } from 'lucide-vue-next'
+import { AlertTriangle, CheckCircle2, ExternalLink, Info, Loader2, Pencil, RefreshCw, Upload } from 'lucide-vue-next'
 import { useI18n } from 'vue-i18n'
 import {
   formatDisplayTime,
@@ -37,6 +37,9 @@ const isUploading = ref(false)
 const navigatingCode = ref<string | null>(null)
 const showCompletedDialog = ref(false)
 
+// Track inline edit state for wrong answers in the list
+const editingAnswers = reactive<Record<number, { code: string, loading: boolean }>>({})
+
 const parsedCodes = computed(() =>
   codesInput.value
     .split(/\r?\n/)
@@ -52,6 +55,10 @@ const remaining = computed(() => {
 const batchId = computed(() => {
   if (!challengeStore.today) return 'BATCH-...'
   return `BATCH-${challengeStore.today.date.replace(/-/g, '')}`
+})
+
+const hasWrongCodes = computed(() => {
+  return (challengeStore.today?.wrong ?? 0) > 0
 })
 
 async function loadChallenge() {
@@ -95,6 +102,36 @@ async function handleUpload() {
     showSubmitFailed(getErrorMessage(error))
   } finally {
     isUploading.value = false
+  }
+}
+
+function startEditAnswer(order: number, currentCode: string) {
+  editingAnswers[order] = { code: currentCode, loading: false }
+}
+
+function cancelEditAnswer(order: number) {
+  delete editingAnswers[order]
+}
+
+async function handleResubmitFromList(order: number) {
+  const edit = editingAnswers[order]
+  if (!edit || !edit.code.trim() || edit.loading) return
+
+  edit.loading = true
+
+  try {
+    const result = await challengeStore.resubmitCode(order, edit.code.trim())
+    showSubmitResult(result.isCorrect)
+
+    if (result.isCorrect) {
+      delete editingAnswers[order]
+    } else {
+      edit.loading = false
+      // Keep editing state so user can try again
+    }
+  } catch (error) {
+    edit.loading = false
+    showSubmitFailed(getErrorMessage(error))
   }
 }
 
@@ -189,7 +226,7 @@ async function navigateToOrder(code: string) {
           <input
             v-model="codesInput"
             type="text"
-            placeholder="AVBCOMMN&#10;XYZ12345&#10;..."
+            placeholder="AVBCOMMN"
             :disabled="isUploading"
             class="min-h-11 min-w-0 flex-1 rounded-xl border-2 border-sky-300 bg-sky-50/40 px-2.5 py-2.5 font-mono text-base uppercase tracking-wide shadow-sm outline-none transition-colors focus-visible:border-sky-500 focus-visible:ring-2 focus-visible:ring-sky-200/80 disabled:cursor-not-allowed disabled:border-input disabled:bg-muted disabled:opacity-60 sm:w-full sm:px-4 sm:py-3 sm:text-sm sm:tracking-widest"
           />
@@ -223,6 +260,16 @@ async function navigateToOrder(code: string) {
         {{ labels.completedBanner }}
       </p>
 
+      <div
+        v-if="hasWrongCodes"
+        class="flex items-start gap-3 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3"
+      >
+        <AlertTriangle class="mt-0.5 size-4 shrink-0 text-rose-500" />
+        <p class="text-sm text-rose-700">
+          {{ t('transactions.wrongCodesWarning') }}
+        </p>
+      </div>
+
       <SectionCard
         :title="t('transactions.uploadedListTitle')"
         :description="t('transactions.uploadedListDescription', { correct: challengeStore.today.correct, wrong: challengeStore.today.wrong })"
@@ -243,46 +290,100 @@ async function navigateToOrder(code: string) {
             v-for="(answer, index) in challengeStore.todayResult!.answers"
             :key="`${answer.order}-${answer.inputCode}`"
             :class="[
-              'flex items-center justify-between rounded-xl border px-4 py-3 transition-colors',
+              'rounded-xl border px-4 py-3 transition-colors',
               answer.isCorrect
-                ? 'cursor-pointer hover:border-primary/40 hover:bg-primary/5'
-                : '',
+                ? 'cursor-pointer border-transparent hover:border-primary/40 hover:bg-primary/5'
+                : 'border-rose-200 bg-rose-50/50',
             ]"
             @click="answer.isCorrect && navigateToOrder(answer.inputCode)"
           >
-            <div class="flex items-center gap-3 min-w-0">
+            <!-- Correct answer or non-editing wrong answer -->
+            <div
+              v-if="answer.isCorrect || !editingAnswers[answer.order]"
+              class="flex items-center justify-between"
+            >
+              <div class="flex items-center gap-3 min-w-0">
+                <span
+                  :class="[
+                    'flex size-7 shrink-0 items-center justify-center rounded-full text-xs font-bold',
+                    answer.isCorrect
+                      ? 'bg-emerald-100 text-emerald-600'
+                      : 'bg-rose-100 text-rose-600',
+                  ]"
+                >
+                  {{ index + 1 }}
+                </span>
+                <div class="min-w-0">
+                  <p
+                    :class="[
+                      'font-mono text-sm font-semibold tracking-widest',
+                      answer.isCorrect
+                        ? 'text-primary underline decoration-primary/30 underline-offset-2'
+                        : 'text-rose-700',
+                    ]"
+                  >
+                    {{ answer.inputCode }}
+                  </p>
+                  <p class="text-xs text-muted-foreground">
+                    {{ formatDisplayTime(answer.submittedAt) }}
+                  </p>
+                </div>
+              </div>
+              <div class="flex items-center gap-2">
+                <Loader2
+                  v-if="navigatingCode === answer.inputCode"
+                  class="size-4 animate-spin text-primary"
+                />
+                <template v-else-if="answer.isCorrect">
+                  <CheckCircle2 class="size-5 text-emerald-600" />
+                  <ExternalLink class="size-3.5 text-muted-foreground" />
+                </template>
+                <template v-else>
+                  <span class="text-xs font-medium text-rose-600">
+                    {{ t('transactions.invalid') }}
+                  </span>
+                  <button
+                    class="ml-1 inline-flex items-center gap-1 rounded-md border border-sky-300 bg-sky-50 px-1.5 py-0.5 text-xs font-medium text-sky-600 transition-colors hover:border-sky-400 hover:bg-sky-100"
+                    :title="t('transactions.resubmit')"
+                    @click.stop="startEditAnswer(answer.order, answer.inputCode)"
+                  >
+                    <Pencil class="size-3" />
+                    <span class="hidden sm:inline">{{ t('transactions.resubmit') }}</span>
+                  </button>
+                </template>
+              </div>
+            </div>
+
+            <!-- Inline edit for wrong answer -->
+            <div v-else class="flex items-center gap-2" @click.stop>
               <span class="flex size-7 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-bold text-muted-foreground">
                 {{ index + 1 }}
               </span>
-              <div class="min-w-0">
-                <p
-                  :class="[
-                    'font-mono text-sm font-semibold tracking-widest',
-                    answer.isCorrect ? 'text-primary underline decoration-primary/30 underline-offset-2' : '',
-                  ]"
-                >
-                  {{ answer.inputCode }}
-                </p>
-                <p class="text-xs text-muted-foreground">
-                  {{ formatDisplayTime(answer.submittedAt) }}
-                </p>
-              </div>
-            </div>
-            <div class="flex items-center gap-2">
-              <Loader2
-                v-if="navigatingCode === answer.inputCode"
-                class="size-4 animate-spin text-primary"
+              <input
+                v-model="editingAnswers[answer.order].code"
+                type="text"
+                class="min-w-0 flex-1 rounded-lg border-2 border-sky-300 bg-sky-50/40 px-2.5 py-1.5 font-mono text-sm uppercase tracking-widest outline-none transition-colors focus-visible:border-sky-500 focus-visible:ring-2 focus-visible:ring-sky-200/80"
+                :disabled="editingAnswers[answer.order].loading"
+                @keyup.enter="handleResubmitFromList(answer.order)"
+                @keyup.escape="cancelEditAnswer(answer.order)"
               />
-              <template v-else-if="answer.isCorrect">
-                <CheckCircle2 class="size-5 text-emerald-600" />
-                <ExternalLink class="size-3.5 text-muted-foreground" />
-              </template>
-              <span
-                v-else
-                class="text-xs font-medium text-rose-600"
+              <Button
+                size="sm"
+                variant="outline"
+                class="shrink-0 gap-1 border-primary bg-primary/5 text-xs text-primary hover:bg-primary/10"
+                :disabled="!editingAnswers[answer.order].code.trim() || editingAnswers[answer.order].loading"
+                @click.stop="handleResubmitFromList(answer.order)"
               >
-                {{ t('transactions.invalid') }}
-              </span>
+                <Loader2 v-if="editingAnswers[answer.order].loading" class="size-3.5 animate-spin" />
+                <RefreshCw v-else class="size-3.5" />
+                <span class="hidden sm:inline">{{ editingAnswers[answer.order].loading ? t('transactions.resubmitting') : t('transactions.resubmit') }}</span>
+              </Button>
+              <button
+                class="shrink-0 rounded-md p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                @click.stop="cancelEditAnswer(answer.order)"
+              >
+                ✕
+              </button>
             </div>
           </div>
         </div>

@@ -3,6 +3,7 @@ import { computed, ref } from 'vue'
 import {
   fetchTodayChallenge,
   fetchTodayResult,
+  resubmitCodeRequest,
   submitCodeRequest,
 } from '@/services/challenge.service'
 import type { TodayChallenge } from '@/types/challenge'
@@ -91,6 +92,30 @@ export const useChallengeStore = defineStore('challenge', () => {
     lastFeedback.value = null
   }
 
+  async function resubmitCode(order: number, code: string) {
+    isSubmitting.value = true
+    lastFeedback.value = null
+
+    try {
+      const result = await resubmitCodeRequest(order, code)
+      lastFeedback.value = result.isCorrect ? 'correct' : 'wrong'
+
+      if (today.value) {
+        today.value = {
+          ...today.value,
+          correct: result.correct,
+          wrong: result.wrong,
+        }
+      }
+
+      await loadTodayResult()
+
+      return result
+    } finally {
+      isSubmitting.value = false
+    }
+  }
+
   return {
     today,
     todayResult,
@@ -104,6 +129,7 @@ export const useChallengeStore = defineStore('challenge', () => {
     loadToday,
     loadTodayResult,
     submitCode,
+    resubmitCode,
     clearFeedback,
   }
 })

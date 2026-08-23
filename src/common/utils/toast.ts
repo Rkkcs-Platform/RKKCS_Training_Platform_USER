@@ -60,6 +60,10 @@ export function showSubmitResult(isCorrect: boolean) {
   showError(t('challenge.wrong'))
 }
 
+export function showResubmitFailed(message?: string) {
+  showError(message ?? t('challenge.resubmitFailed'))
+}
+
 export function showChallengeCompleted() {
   showSuccess(t('challenge.completed'))
 }
