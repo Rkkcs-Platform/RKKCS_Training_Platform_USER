@@ -3,7 +3,7 @@ import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
-import type { ShipmentMapData } from '@/types/order'
+import type { ShipmentMapData, ShipmentMapPoint } from '@/types/order'
 
 const props = defineProps<{
   map: ShipmentMapData | null | undefined
@@ -15,8 +15,23 @@ const container = ref<HTMLElement | null>(null)
 let leafletMap: L.Map | null = null
 let layerGroup: L.LayerGroup | null = null
 
+function toLatLng(point: ShipmentMapPoint | undefined): [number, number] | null {
+  const lat = point?.lat
+  const lng = point?.lng
+  if (typeof lat !== 'number' || typeof lng !== 'number' || !Number.isFinite(lat) || !Number.isFinite(lng)) {
+    return null
+  }
+  return [lat, lng]
+}
+
 function renderMap() {
-  if (!container.value || !props.map?.current?.lat || !props.map?.destination?.lat) {
+  if (!container.value || !props.map) {
+    return
+  }
+
+  const currentPos = toLatLng(props.map.current)
+  const destPos = toLatLng(props.map.destination)
+  if (!currentPos || !destPos) {
     return
   }
 
@@ -53,23 +68,20 @@ function renderMap() {
     iconAnchor: [7, 7],
   })
 
-  const currentMarker = L.marker([current.lat, current.lng], {
+  const currentMarker = L.marker(currentPos, {
     icon: currentIcon,
   }).bindPopup(
     `<strong>${current.label || t('trackingMap.currentPosition')}</strong>`,
   )
 
-  const destMarker = L.marker([dest.lat, dest.lng], {
+  const destMarker = L.marker(destPos, {
     icon: destIcon,
   }).bindPopup(
     `<strong>${dest.label || t('trackingMap.deliveryPoint')}</strong>`,
   )
 
   const line = L.polyline(
-    [
-      [current.lat, current.lng],
-      [dest.lat, dest.lng],
-    ],
+    [currentPos, destPos],
     {
       color: '#2563eb',
       weight: 3,
@@ -83,10 +95,7 @@ function renderMap() {
   layerGroup?.addLayer(line)
 
   leafletMap.fitBounds(
-    L.latLngBounds(
-      [current.lat, current.lng],
-      [dest.lat, dest.lng],
-    ).pad(0.35),
+    L.latLngBounds(currentPos, destPos).pad(0.35),
   )
 
   // Leaflet needs a tick after container is visible
