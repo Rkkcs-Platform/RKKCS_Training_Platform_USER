@@ -179,6 +179,10 @@ export default {
     completedDialogDescription: '{name} đã hoàn thành nhập mã giao dịch trong ngày.',
     completedDialogStay: 'Xem lại giao dịch',
     completedDialogHistory: 'Xem lịch sử',
+    codeNotFound: 'Mã vừa nhập không được tìm thấy trên hệ thống, xin kiểm tra lại.',
+    resubmit: 'Gửi lại',
+    resubmitting: 'Đang gửi...',
+    wrongCodesWarning: 'Có mã chưa chính xác do không tìm được trên hệ thống, hãy kiểm tra lại.',
   },
 
   challenge: {
@@ -192,6 +196,7 @@ export default {
     loadFailedHint: 'Kiểm tra kết nối mạng rồi thử lại.',
     completedBanner: 'Bạn đã hoàn thành nhập mã hôm nay.',
     todayResultTitle: 'Kết quả hôm nay',
+    resubmitFailed: 'Gửi lại thất bại. Vui lòng thử lại',
   },
 
   history: {

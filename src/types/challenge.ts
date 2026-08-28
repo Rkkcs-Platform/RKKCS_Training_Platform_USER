@@ -12,6 +12,7 @@ export interface TodayChallenge {
 
 export interface SubmitCodeResponse {
   isCorrect: boolean
+  order: number
   submitted: number
   correct: number
   wrong: number

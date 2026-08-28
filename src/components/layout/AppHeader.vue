@@ -3,7 +3,6 @@ import { Bell, Menu } from 'lucide-vue-next'
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { getRouteTitle } from '@/common/constants/navigation'
-
 import { Button } from '@/components/ui/button'
 import LanguageSwitcher from '@/components/shared/LanguageSwitcher.vue'
 

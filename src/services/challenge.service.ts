@@ -25,3 +25,11 @@ export async function submitCodeRequest(code: string) {
   )
   return data
 }
+
+export async function resubmitCodeRequest(order: number, code: string) {
+  const { data } = await api.patch<SubmitCodeResponse>(
+    '/batches/resubmit-code',
+    { order, code },
+  )
+  return data
+}

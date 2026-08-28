@@ -179,6 +179,10 @@ export default {
     completedDialogDescription: '{name}は本日の取引コード入力を完了しました。',
     completedDialogStay: '取引を確認する',
     completedDialogHistory: '履歴を見る',
+    codeNotFound: '入力されたコードはシステムに見つかりませんでした。確認して再度お試しください。',
+    resubmit: '再送信',
+    resubmitting: '再送信中...',
+    wrongCodesWarning: 'システムで見つからないコードがあります。確認して修正してください。',
   },
 
   challenge: {
@@ -192,6 +196,7 @@ export default {
     loadFailedHint: 'ネットワーク接続を確認して再試行してください。',
     completedBanner: '本日のコード入力が完了しました。',
     todayResultTitle: '本日の結果',
+    resubmitFailed: '再送信に失敗しました。もう一度お試しください',
   },
 
   history: {

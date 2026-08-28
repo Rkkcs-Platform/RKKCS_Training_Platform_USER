@@ -179,6 +179,10 @@ export default {
     completedDialogDescription: '{name} has completed entering transaction codes for the day.',
     completedDialogStay: 'Review transactions',
     completedDialogHistory: 'View history',
+    codeNotFound: 'The code entered was not found in the system. Please check and try again.',
+    resubmit: 'Resubmit',
+    resubmitting: 'Resubmitting...',
+    wrongCodesWarning: 'Some codes were not found in the system. Please review and correct them.',
   },
 
   challenge: {
@@ -192,6 +196,7 @@ export default {
     loadFailedHint: 'Check your network connection and try again.',
     completedBanner: "You have completed today's code entry.",
     todayResultTitle: "Today's results",
+    resubmitFailed: 'Resubmit failed. Please try again',
   },
 
   history: {
