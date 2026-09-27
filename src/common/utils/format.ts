@@ -1,19 +1,10 @@
 import { useI18n } from 'vue-i18n'
 
-const CURRENCY_MAP: Record<string, { locale: string; currency: string }> = {
-  vi: { locale: 'vi-VN', currency: 'VND' },
-  en: { locale: 'en-US', currency: 'USD' },
-  ja: { locale: 'ja-JP', currency: 'JPY' },
-}
-
 export function useFormatCurrency() {
-  const { locale } = useI18n()
-
   return (amount: number) => {
-    const config = CURRENCY_MAP[locale.value] ?? CURRENCY_MAP.vi
-    return new Intl.NumberFormat(config.locale, {
+    return new Intl.NumberFormat('ja-JP', {
       style: 'currency',
-      currency: config.currency,
+      currency: 'JPY',
       maximumFractionDigits: 0,
     }).format(amount)
   }
