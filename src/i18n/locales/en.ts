@@ -89,6 +89,7 @@ export default {
     noProducts: 'No products yet',
     defaultProduct: 'Default product',
     total: 'Total',
+    taxIncluded: 'tax incl.',
     trackingTitle: 'Shipment Tracking',
     viewFullTracking: 'View full tracking page',
     updateOrderTitle: 'Update Order',

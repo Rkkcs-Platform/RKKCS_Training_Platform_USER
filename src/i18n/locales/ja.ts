@@ -89,6 +89,7 @@ export default {
     noProducts: 'まだ商品がありません',
     defaultProduct: 'デフォルト商品',
     total: '合計',
+    taxIncluded: '税込',
     trackingTitle: '配送追跡',
     viewFullTracking: '追跡ページ全体を表示',
     updateOrderTitle: '注文を更新',
