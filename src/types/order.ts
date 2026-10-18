@@ -83,6 +83,9 @@ export interface OrderItem {
   productId: string
   productCode: string
   productName: string
+  brand?: string
+  sku?: string
+  imageUrl?: string
   quantity: number
   unitPrice: number
   lineTotal: number
@@ -121,6 +124,9 @@ export interface ProductListItem {
   id: string
   productCode: string
   name: string
+  brand?: string
+  sku?: string
+  imageUrl?: string
   price: number
   status: string
   isDefault?: boolean

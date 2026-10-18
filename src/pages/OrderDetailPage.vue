@@ -211,20 +211,37 @@ watch(
           :key="item.id"
           class="flex items-center justify-between gap-3 rounded-xl border p-3"
         >
-          <div class="min-w-0">
-            <p class="font-semibold">{{ translateProductName(item.productName) }}</p>
-            <p class="text-xs text-muted-foreground">
-              {{ item.productCode }} · x{{ item.quantity }}
-            </p>
+          <div class="flex min-w-0 items-center gap-3">
+            <img
+              v-if="item.imageUrl"
+              :src="item.imageUrl"
+              :alt="item.productName"
+              class="size-12 shrink-0 rounded-lg object-cover"
+            />
+            <div class="min-w-0">
+              <p v-if="item.brand" class="text-xs text-muted-foreground">
+                {{ item.brand }}
+              </p>
+              <p class="font-semibold">{{ translateProductName(item.productName) }}</p>
+              <p class="text-xs text-muted-foreground">
+                {{ item.sku || item.productCode }} · x{{ item.quantity }}
+              </p>
+            </div>
           </div>
-          <p class="shrink-0 font-semibold">
+          <p class="shrink-0 text-right font-semibold">
             {{ formatCurrency(item.lineTotal) }}
+            <span class="block text-[10px] font-normal text-muted-foreground">
+              {{ t('orders.taxIncluded') }}
+            </span>
           </p>
         </div>
       </div>
       <p class="mt-3 text-sm font-medium">
         {{ t('orders.total') }}:
         {{ formatCurrency(ordersStore.detail.amount) }}
+        <span class="text-xs font-normal text-muted-foreground">
+          {{ t('orders.taxIncluded') }}
+        </span>
       </p>
     </SectionCard>
 
@@ -400,7 +417,7 @@ watch(
               :key="product.id"
               :value="product.id"
             >
-              {{ product.productCode }} — {{ translateProductName(product.name) }}
+              {{ product.brand ? `${product.brand} · ` : '' }}{{ translateProductName(product.name) }}
               ({{ formatCurrency(product.price) }})
             </option>
           </select>
@@ -441,6 +458,10 @@ watch(
         <p class="font-medium">
           {{ ordersStore.detail.payment.paymentCode }}
           · {{ ordersStore.detail.payment.method || '—' }}
+        </p>
+        <p class="mt-1 text-sm text-muted-foreground">
+          {{ formatCurrency(ordersStore.detail.payment.amount) }}
+          {{ t('orders.taxIncluded') }}
         </p>
         <StatusBadge
           :status="ordersStore.detail.payment.status"

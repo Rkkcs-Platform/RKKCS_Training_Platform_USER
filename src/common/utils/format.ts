@@ -20,6 +20,26 @@ const KNOWN_NOTES: Record<string, Record<string, string>> = {
     en: 'Shipment created',
     ja: '出荷作成済み',
   },
+  'Shipment created': {
+    vi: 'Vận đơn được tạo',
+    en: 'Shipment created',
+    ja: '荷物を受け付けました',
+  },
+  'Pending pickup': {
+    vi: 'Đơn đang chờ lấy hàng',
+    en: 'Pending pickup',
+    ja: '集荷の受付が完了しました',
+  },
+  'In transit': {
+    vi: 'Đơn đang trên đường vận chuyển',
+    en: 'In transit',
+    ja: '輸送中です。到着予定を確認してください',
+  },
+  'Delivered successfully': {
+    vi: 'Giao hàng thành công',
+    en: 'Delivered successfully',
+    ja: '配達が完了しました',
+  },
   'Đơn đang chờ lấy hàng': {
     vi: 'Đơn đang chờ lấy hàng',
     en: 'Pending pickup',

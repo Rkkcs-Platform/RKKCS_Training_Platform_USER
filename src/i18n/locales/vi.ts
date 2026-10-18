@@ -89,6 +89,7 @@ export default {
     noProducts: 'Chưa có sản phẩm',
     defaultProduct: 'Sản phẩm mặc định',
     total: 'Tổng',
+    taxIncluded: 'đã gồm thuế',
     trackingTitle: 'Tracking vận chuyển',
     viewFullTracking: 'Xem trang tracking đầy đủ',
     updateOrderTitle: 'Cập nhật đơn hàng',
