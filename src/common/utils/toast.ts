@@ -51,13 +51,13 @@ export function showSubmitFailed(message?: string) {
   showError(message ?? t('challenge.submitFailed'))
 }
 
-export function showSubmitResult(isCorrect: boolean) {
+export function showSubmitResult(isCorrect: boolean, detail?: string) {
   if (isCorrect) {
-    showSuccess(t('challenge.correct'))
+    showSuccess(detail || t('transactions.receivedToastPlain'))
     return
   }
 
-  showError(t('challenge.wrong'))
+  showError(t('transactions.missingOrderToast'))
 }
 
 export function showResubmitFailed(message?: string) {
