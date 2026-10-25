@@ -6,8 +6,8 @@ import {
   resubmitCodeRequest,
   submitCodeRequest,
 } from '@/services/challenge.service'
-import type { TodayChallenge } from '@/types/challenge'
-import type { SubmissionDetail } from '@/types/submission'
+import type { SubmitCodeResponse, TodayChallenge } from '@/types/challenge'
+import type { SubmissionAnswer, SubmissionDetail } from '@/types/submission'
 
 export const useChallengeStore = defineStore('challenge', () => {
   const today = ref<TodayChallenge | null>(null)
@@ -76,11 +76,14 @@ export const useChallengeStore = defineStore('challenge', () => {
           wrong: result.wrong,
           status: result.completed ? 'completed' : 'in_progress',
         }
+        if (!todayResult.value && result.submitted > 1) {
+          await loadTodayResult()
+        } else {
+          rememberAnswer(code, result)
+        }
       } else {
         await loadToday()
       }
-
-      await loadTodayResult()
 
       return result
     } finally {
@@ -108,11 +111,58 @@ export const useChallengeStore = defineStore('challenge', () => {
         }
       }
 
-      await loadTodayResult()
+      if (!todayResult.value && result.submitted > 1) {
+        await loadTodayResult()
+      } else {
+        rememberAnswer(code, result)
+      }
 
       return result
     } finally {
       isSubmitting.value = false
+    }
+  }
+
+  function rememberAnswer(code: string, result: SubmitCodeResponse) {
+    const answer: SubmissionAnswer = {
+      order: result.order,
+      inputCode: (result.inputCode || code).trim().toUpperCase(),
+      isCorrect: result.isCorrect,
+      submittedAt: result.submittedAt || new Date().toISOString(),
+      orderPreview: result.orderPreview,
+    }
+
+    if (!todayResult.value) {
+      todayResult.value = {
+        date: today.value?.date ?? '',
+        totalCodes: today.value?.totalCodes ?? result.submitted,
+        submitted: result.submitted,
+        correct: result.correct,
+        wrong: result.wrong,
+        accuracy: result.accuracy ?? 0,
+        status: result.completed ? 'completed' : 'in_progress',
+        startedAt: today.value?.startedAt,
+        answers: [answer],
+      }
+      return
+    }
+
+    const answers = todayResult.value.answers.slice()
+    const index = answers.findIndex((item) => item.order === result.order)
+    if (index >= 0) {
+      answers[index] = { ...answers[index], ...answer }
+    } else {
+      answers.push(answer)
+    }
+
+    todayResult.value = {
+      ...todayResult.value,
+      submitted: result.submitted,
+      correct: result.correct,
+      wrong: result.wrong,
+      accuracy: result.accuracy ?? todayResult.value.accuracy,
+      status: result.completed ? 'completed' : todayResult.value.status,
+      answers,
     }
   }
 
