@@ -21,6 +21,11 @@ const maxRevenue = computed(() => {
   return Math.max(...amounts, 1)
 })
 
+function barPercent(amount: number) {
+  if (amount <= 0) return '0%'
+  return `${Math.max((amount / maxRevenue.value) * 100, 8)}%`
+}
+
 const formatCurrency = useFormatCurrency()
 
 function formatKpiValue(kpi: ShopDashboard['kpis'][number]) {
@@ -72,20 +77,19 @@ onMounted(async () => {
 
       <div class="grid gap-5 lg:grid-cols-2">
         <SectionCard :title="t('dashboard.revenueTitle')">
-          <div class="flex h-40 items-end gap-2">
+          <div class="flex h-48 gap-2">
             <div
               v-for="point in data.revenueTrend"
               :key="point.date"
-              class="flex flex-1 flex-col items-center gap-2"
+              class="flex h-full min-w-0 flex-1 flex-col"
             >
-              <div
-                class="w-full rounded-t-md bg-primary/80"
-                :style="{
-                  height: `${(point.amount / maxRevenue) * 100}%`,
-                  minHeight: '12px',
-                }"
-              />
-              <span class="text-[10px] text-muted-foreground">
+              <div class="relative min-h-0 flex-1">
+                <div
+                  class="absolute inset-x-0 bottom-0 rounded-t-md bg-primary/80"
+                  :style="{ height: barPercent(point.amount) }"
+                />
+              </div>
+              <span class="pt-2 text-center text-[11px] text-muted-foreground">
                 {{ point.date.slice(5) }}
               </span>
             </div>

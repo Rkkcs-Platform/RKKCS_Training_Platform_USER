@@ -9,11 +9,23 @@ export interface SubmissionHistoryItem {
   completedAt?: string
 }
 
+export interface SubmissionOrderPreview {
+  customerName?: string
+  productName?: string
+  brand?: string
+  imageUrl?: string
+  extraItems: number
+  amount?: number
+  carrier?: string
+  deliveryAddress?: string
+}
+
 export interface SubmissionAnswer {
   order: number
   inputCode: string
   isCorrect: boolean
   submittedAt: string
+  orderPreview?: SubmissionOrderPreview
 }
 
 export interface SubmissionDetail {
