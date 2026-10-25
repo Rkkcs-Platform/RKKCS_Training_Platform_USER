@@ -1,3 +1,5 @@
+import type { SubmissionOrderPreview } from '@/types/submission'
+
 export type SubmissionStatus = 'in_progress' | 'completed'
 
 export interface TodayChallenge {
@@ -16,5 +18,9 @@ export interface SubmitCodeResponse {
   submitted: number
   correct: number
   wrong: number
+  accuracy?: number
   completed: boolean
+  inputCode?: string
+  submittedAt?: string
+  orderPreview?: SubmissionOrderPreview
 }
