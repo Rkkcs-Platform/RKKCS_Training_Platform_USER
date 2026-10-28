@@ -1,75 +1,181 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { useI18n } from 'vue-i18n'
-import { Construction, RefreshCw } from 'lucide-vue-next'
-import { Button } from '@/components/ui/button'
-import vi from '@/i18n/locales/vi'
-import en from '@/i18n/locales/en'
-import ja from '@/i18n/locales/ja'
 import { setLocale, type AppLocale } from '@/i18n'
+import logoUrl from '@/assets/logo.png'
 
-const { t } = useI18n()
 const router = useRouter()
-const isChecking = ref(false)
+const untilIso = ref<string | null>(null)
+const nowMs = ref(Date.now())
+let pollTimer: ReturnType<typeof setInterval> | undefined
+let countdownTimer: ReturnType<typeof setInterval> | undefined
 
-async function handleRetry() {
-  isChecking.value = true
-  try {
-    const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1'}/setting/maintenance`)
-    const data = await res.json()
-    if (data.language && !sessionStorage.getItem('rkkcs-lang-initialized')) {
-      setLocale(data.language as AppLocale)
-    }
-    if (!data.maintenance) {
-      await router.replace({ name: 'dashboard' })
-    }
-  } catch {
-    // still down
-  } finally {
-    isChecking.value = false
+const notices = [
+  {
+    title: 'コード入力システムは一時停止中です',
+    body: 'システム更新のため現在ご利用いただけません。下記の予定時刻以降に再度アクセスしてください。',
+    until: '再開予定時刻',
+    remaining: '再開まで',
+  },
+  {
+    title: 'Hệ thống tạm ngừng phục vụ',
+    body: 'Hệ thống đang tạm dừng để khắc phục sự cố. Vui lòng quay trở lại sau thời gian dự kiến bên dưới.',
+    until: 'Thời gian dự kiến hoạt động trở lại',
+    remaining: 'Còn lại',
+  },
+  {
+    title: '코드 입력 시스템이 일시 중단되었습니다',
+    body: '시스템 업데이트로 현재 이용할 수 없습니다. 아래 예정 시각 이후에 다시 접속해 주세요.',
+    until: '서비스 재개 예정 시각',
+    remaining: '남은 시간',
+  },
+] as const
+
+const untilDate = computed(() => {
+  if (!untilIso.value) return null
+  const date = new Date(untilIso.value)
+  return Number.isNaN(date.getTime()) ? null : date
+})
+
+const untilLabel = computed(() => {
+  if (!untilDate.value) return null
+  return untilDate.value.toLocaleTimeString('vi-VN', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  })
+})
+
+const remainingMs = computed(() => {
+  if (!untilDate.value) return null
+  return Math.max(0, untilDate.value.getTime() - nowMs.value)
+})
+
+const countdownLabel = computed(() => {
+  if (remainingMs.value == null) return null
+  const totalSeconds = Math.floor(remainingMs.value / 1000)
+  const hours = Math.floor(totalSeconds / 3600)
+  const minutes = Math.floor((totalSeconds % 3600) / 60)
+  const seconds = totalSeconds % 60
+  const pad = (value: number) => String(value).padStart(2, '0')
+  return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`
+})
+
+async function fetchMaintenanceStatus() {
+  const res = await fetch(
+    `${import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1'}/setting/maintenance`,
+  )
+  const data = await res.json() as {
+    maintenance?: boolean
+    language?: string
+    until?: string | null
   }
+
+  if (data.language && !sessionStorage.getItem('rkkcs-lang-initialized')) {
+    setLocale(data.language as AppLocale)
+  }
+
+  untilIso.value = data.until ?? null
+  return Boolean(data.maintenance)
 }
+
+onMounted(() => {
+  void fetchMaintenanceStatus().catch(() => undefined)
+  pollTimer = setInterval(() => {
+    void fetchMaintenanceStatus()
+      .then(async (stillDown) => {
+        if (!stillDown) {
+          await router.replace({ name: 'dashboard' })
+        }
+      })
+      .catch(() => undefined)
+  }, 30_000)
+
+  countdownTimer = setInterval(() => {
+    nowMs.value = Date.now()
+    if (untilDate.value && untilDate.value.getTime() <= Date.now()) {
+      void fetchMaintenanceStatus()
+        .then(async (stillDown) => {
+          if (!stillDown) {
+            await router.replace({ name: 'dashboard' })
+          }
+        })
+        .catch(() => undefined)
+    }
+  }, 1000)
+})
+
+onUnmounted(() => {
+  if (pollTimer) clearInterval(pollTimer)
+  if (countdownTimer) clearInterval(countdownTimer)
+})
 </script>
 
 <template>
-  <div class="flex min-h-svh flex-col items-center justify-center bg-gradient-to-br from-slate-50 via-sky-50 to-indigo-50 px-6 text-center">
-    <div class="mx-auto w-full max-w-lg space-y-6">
-      <div class="mx-auto flex size-24 items-center justify-center rounded-full bg-sky-100 shadow-lg shadow-sky-100/50">
-        <Construction class="size-12 text-sky-600" />
-      </div>
+  <div class="flex min-h-svh flex-col bg-[#f3f4f6]">
+    <main class="flex flex-1 items-center justify-center px-4 py-6 sm:px-6 sm:py-12">
+      <div class="w-full max-w-2xl overflow-hidden border border-slate-200 bg-white shadow-[0_12px_40px_-24px_rgba(15,23,42,0.35)]">
+        <div class="h-1.5 w-full bg-[#a3007e]" />
 
-      <div class="space-y-4 bg-white/70 backdrop-blur-md p-6 rounded-2xl border border-slate-200/60 shadow-lg">
-        <div class="space-y-1 text-center pb-3 border-b border-slate-100">
-          <h1 class="text-xl font-extrabold text-slate-800">Hệ thống đang bảo trì</h1>
-          <h2 class="text-base font-bold text-slate-600">System Under Maintenance</h2>
-          <h2 class="text-sm font-semibold text-slate-500">システムメンテナンス中</h2>
+        <div class="flex flex-col items-center border-b border-slate-100 bg-white px-6 pb-6 pt-8 sm:px-8 sm:pb-8 sm:pt-10">
+          <img
+            :src="logoUrl"
+            alt="RKKCS — 期待を超える 未来を創る"
+            class="h-20 w-auto max-w-[min(100%,280px)] object-contain sm:h-24 sm:max-w-[320px]"
+          />
+          <p class="mt-5 text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400">
+            System notice
+          </p>
         </div>
-        <div class="space-y-3 text-sm text-slate-500 leading-relaxed pt-1">
-          <p>{{ vi.maintenance.description }}</p>
-          <p>{{ en.maintenance.description }}</p>
-          <p>{{ ja.maintenance.description }}</p>
+
+        <div class="divide-y divide-slate-100">
+          <section
+            v-for="(notice, index) in notices"
+            :key="index"
+            class="px-6 py-5 sm:px-8"
+          >
+            <h2 class="text-base font-semibold leading-snug text-slate-900 sm:text-lg">
+              {{ notice.title }}
+            </h2>
+            <p class="mt-2 text-sm leading-6 text-slate-600">
+              {{ notice.body }}
+            </p>
+          </section>
+        </div>
+
+        <div
+          v-if="untilLabel"
+          class="border-t border-slate-200 bg-slate-50 px-6 py-7 sm:px-8"
+        >
+          <div class="space-y-1 text-center">
+            <p
+              v-for="(notice, index) in notices"
+              :key="`until-${index}`"
+              class="text-[11px] font-medium text-slate-500"
+            >
+              {{ notice.until }}
+            </p>
+          </div>
+          <p class="mt-4 text-center text-4xl font-semibold tabular-nums tracking-tight text-[#a3007e] sm:text-5xl">
+            {{ untilLabel }}
+          </p>
+
+          <div v-if="countdownLabel" class="mt-5 border-t border-slate-200/80 pt-5">
+            <div class="space-y-0.5 text-center">
+              <p
+                v-for="(notice, index) in notices"
+                :key="`remaining-${index}`"
+                class="text-[11px] font-medium text-slate-500"
+              >
+                {{ notice.remaining }}
+              </p>
+            </div>
+            <p class="mt-2 text-center font-mono text-2xl font-semibold tabular-nums tracking-wider text-slate-800 sm:text-3xl">
+              {{ countdownLabel }}
+            </p>
+          </div>
         </div>
       </div>
-
-      <Button
-        variant="outline"
-        class="mx-auto gap-2 border-sky-200 bg-white/80 px-6 shadow-sm hover:bg-sky-50"
-        :disabled="isChecking"
-        @click="handleRetry"
-      >
-        <RefreshCw :class="['size-4', isChecking ? 'animate-spin' : '']" />
-        {{ t('maintenance.retry') }}
-      </Button>
-
-      <div class="flex items-center justify-center gap-2 pt-2">
-        <span class="relative flex size-2.5">
-          <span class="absolute inline-flex size-full animate-ping rounded-full bg-amber-400 opacity-75" />
-          <span class="relative inline-flex size-2.5 rounded-full bg-amber-500" />
-        </span>
-        <span class="text-xs text-slate-400">Maintenance in progress</span>
-      </div>
-    </div>
+    </main>
   </div>
 </template>
-

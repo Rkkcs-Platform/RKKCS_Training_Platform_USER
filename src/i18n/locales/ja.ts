@@ -370,8 +370,12 @@ export default {
     deliveryDestination: '配送先',
   },
   maintenance: {
-    title: 'システムメンテナンス中',
-    description: 'より良いサービスを提供するため、システムをアップグレード中です。しばらくしてからもう一度お試しください。',
-    retry: '再試行',
+    title: 'コード入力システムは一時停止中です',
+    description:
+      'システム更新のため現在ご利用いただけません。下記の予定時刻以降に再度アクセスしてください。',
+    estimatedReturn: '再開予定時刻',
+    retry: '再度確認する',
+    brand: 'RKKCS Operations Platform',
+    notice: 'システム通知',
   },
 }

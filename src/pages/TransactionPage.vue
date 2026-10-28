@@ -303,7 +303,7 @@ async function navigateToOrder(code: string) {
 
         <div v-else class="space-y-2">
           <div
-            v-for="(answer, index) in challengeStore.todayResult!.answers"
+            v-for="answer in challengeStore.todayResult!.answers"
             :key="`${answer.order}-${answer.inputCode}`"
             :class="[
               'rounded-xl border px-4 py-3 transition-colors',
@@ -324,10 +324,16 @@ async function navigateToOrder(code: string) {
                 :alt="answer.orderPreview.productName || answer.inputCode"
                 class="size-16 shrink-0 rounded-xl object-cover"
               />
+              <div
+                v-else
+                class="flex size-16 shrink-0 items-center justify-center rounded-xl bg-sky-50 text-lg font-semibold tabular-nums text-sky-700"
+              >
+                {{ answer.order }}
+              </div>
               <div class="min-w-0 flex-1">
                 <div class="flex items-start justify-between gap-2">
                   <p class="text-lg font-semibold leading-snug">
-                    {{ answer.orderPreview?.customerName || t('transactions.received') }}
+                    <span class="mr-1.5 tabular-nums text-sky-600">{{ answer.order }}.</span>{{ answer.orderPreview?.customerName || t('transactions.received') }}
                   </p>
                   <p v-if="answer.orderPreview?.amount != null" class="shrink-0 text-lg font-bold">
                     {{ formatYen(answer.orderPreview.amount) }}
@@ -372,7 +378,7 @@ async function navigateToOrder(code: string) {
             >
               <div class="min-w-0">
                 <p class="text-base font-semibold text-rose-700">
-                  {{ t('transactions.invalid') }}
+                  <span class="mr-1.5 tabular-nums text-rose-600">{{ answer.order }}.</span>{{ t('transactions.invalid') }}
                 </p>
                 <p class="font-mono text-lg font-semibold tracking-widest text-rose-800">
                   {{ answer.inputCode }}
@@ -392,8 +398,8 @@ async function navigateToOrder(code: string) {
 
             <!-- Inline edit for wrong answer -->
             <div v-else class="flex items-center gap-2" @click.stop>
-              <span class="flex size-7 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-bold text-muted-foreground">
-                {{ index + 1 }}
+              <span class="w-6 shrink-0 text-center text-sm font-semibold tabular-nums text-rose-600">
+                {{ answer.order }}.
               </span>
               <input
                 v-model="editingAnswers[answer.order].code"
