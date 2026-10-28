@@ -370,8 +370,12 @@ export default {
     deliveryDestination: 'Điểm cần giao đến',
   },
   maintenance: {
-    title: 'Hệ thống đang bảo trì',
-    description: 'Chúng tôi đang nâng cấp hệ thống để phục vụ bạn tốt hơn. Vui lòng quay lại sau.',
-    retry: 'Thử lại',
+    title: 'Hệ thống nhập mã tạm ngừng phục vụ',
+    description:
+      'Hệ thống đang được cập nhật. Vui lòng quay trở lại sau thời gian dự kiến bên dưới.',
+    estimatedReturn: 'Thời gian dự kiến hoạt động trở lại',
+    retry: 'Kiểm tra lại',
+    brand: 'RKKCS Operations Platform',
+    notice: 'Thông báo hệ thống',
   },
 }

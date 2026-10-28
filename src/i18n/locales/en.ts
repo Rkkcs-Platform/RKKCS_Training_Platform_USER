@@ -370,8 +370,12 @@ export default {
     deliveryDestination: 'Delivery destination',
   },
   maintenance: {
-    title: 'System Under Maintenance',
-    description: 'We are upgrading the system to serve you better. Please check back later.',
-    retry: 'Retry',
+    title: 'Code entry system temporarily unavailable',
+    description:
+      'The system is being updated. Please return after the estimated time below.',
+    estimatedReturn: 'Estimated return to service',
+    retry: 'Check again',
+    brand: 'RKKCS Operations Platform',
+    notice: 'System notice',
   },
 }
