@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { getErrorMessage, showRequestFailed, showSuccess } from '@/common'
 import { useCleanText, useFormatCurrency } from '@/common/utils/format'
+import PageLoading from '@/components/shared/PageLoading.vue'
 import SectionCard from '@/components/shared/SectionCard.vue'
 import ShipmentTracking from '@/components/shared/ShipmentTracking.vue'
 import StatusBadge from '@/components/shared/StatusBadge.vue'
@@ -177,9 +178,10 @@ watch(
 </script>
 
 <template>
-  <div v-if="ordersStore.isLoadingDetail" class="text-muted-foreground">
-    {{ t('orders.loadingDetail') }}
-  </div>
+  <PageLoading
+    v-if="ordersStore.isLoadingDetail"
+    :label="t('orders.loadingDetail')"
+  />
 
   <div v-else-if="ordersStore.detail" class="space-y-5">
     <div class="flex flex-wrap items-center justify-between gap-3">

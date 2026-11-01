@@ -7,6 +7,7 @@ import {
   showHistoryDetailFailed,
   showHistoryLoadFailed,
 } from '@/common'
+import PageLoading from '@/components/shared/PageLoading.vue'
 import { Badge } from '@/components/ui/badge'
 import {
   Card,
@@ -56,9 +57,11 @@ async function handleSelectDate(date: string) {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div v-if="historyStore.isLoadingList" class="text-muted-foreground">
-          {{ t('common.loading') }}
-        </div>
+        <PageLoading
+          v-if="historyStore.isLoadingList"
+          compact
+          :label="t('common.loading')"
+        />
 
         <div
           v-else-if="historyStore.items.length === 0"
@@ -147,9 +150,11 @@ async function handleSelectDate(date: string) {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div v-if="historyStore.isLoadingDetail" class="text-muted-foreground">
-          {{ t('common.loadingDetail') }}
-        </div>
+        <PageLoading
+          v-if="historyStore.isLoadingDetail"
+          compact
+          :label="t('common.loadingDetail')"
+        />
 
         <div
           v-else-if="!historyStore.detail?.answers.length"

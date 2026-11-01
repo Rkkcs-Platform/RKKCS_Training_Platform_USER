@@ -3,6 +3,7 @@ import { onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
 import { formatDisplayDate, showRequestFailed } from '@/common'
+import PageLoading from '@/components/shared/PageLoading.vue'
 import StatusBadge from '@/components/shared/StatusBadge.vue'
 import { Card, CardContent } from '@/components/ui/card'
 import { useShipmentsStore } from '@/stores/orders'
@@ -21,9 +22,10 @@ onMounted(async () => {
 
 <template>
   <div class="space-y-5">
-    <div v-if="shipmentsStore.isLoadingList" class="text-muted-foreground">
-      {{ t('shipments.loadingShipments') }}
-    </div>
+    <PageLoading
+      v-if="shipmentsStore.isLoadingList"
+      :label="t('shipments.loadingShipments')"
+    />
 
     <template v-else>
       <div class="space-y-3">

@@ -4,6 +4,7 @@ import { Search } from 'lucide-vue-next'
 import { useI18n } from 'vue-i18n'
 import { showRequestFailed } from '@/common'
 import OrderListItem from '@/components/shared/OrderListItem.vue'
+import PageLoading from '@/components/shared/PageLoading.vue'
 import { Input } from '@/components/ui/input'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useOrdersStore } from '@/stores/orders'
@@ -64,9 +65,10 @@ onMounted(async () => {
       </TabsList>
     </Tabs>
 
-    <div v-if="ordersStore.isLoadingList" class="text-muted-foreground">
-      {{ t('orders.loadingOrders') }}
-    </div>
+    <PageLoading
+      v-if="ordersStore.isLoadingList"
+      :label="t('orders.loadingOrders')"
+    />
 
     <template v-else>
       <div class="space-y-4">

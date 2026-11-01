@@ -13,6 +13,7 @@ import MenuNavItem from '@/components/shared/MenuNavItem.vue'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { useAuthStore } from '@/stores/auth'
+import logoUrl from '@/assets/logo.png'
 
 const props = defineProps<{
   open?: boolean
@@ -64,11 +65,13 @@ function handleNavigate() {
         )
       "
     >
-    <div class="border-b p-5">
-      <p class="text-xs font-semibold uppercase tracking-[0.2em] text-primary">
-        {{ APP_LABELS.brandShort }}
-      </p>
-      <p class="mt-1 text-lg font-bold">{{ APP_LABELS.appName }}</p>
+    <div class="border-b px-5 py-4">
+      <img
+        :src="logoUrl"
+        alt="RKKCS"
+        class="h-10 w-auto max-w-[180px] object-contain"
+      />
+      <p class="mt-2 text-xs text-muted-foreground">{{ APP_LABELS.appName }}</p>
     </div>
 
     <div class="border-b bg-primary p-4 text-primary-foreground">

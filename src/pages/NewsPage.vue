@@ -3,6 +3,7 @@ import { onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { getErrorMessage, showRequestFailed } from '@/common'
+import PageLoading from '@/components/shared/PageLoading.vue'
 import SectionCard from '@/components/shared/SectionCard.vue'
 import { fetchNews, type NewsItem } from '@/services/phase5.service'
 
@@ -36,7 +37,11 @@ onMounted(() => {
 <template>
   <div class="space-y-4">
     <SectionCard :title="t('news.title')" :description="t('news.description')">
-      <div v-if="isLoading" class="text-sm text-muted-foreground">{{ t('common.loading') }}</div>
+      <PageLoading
+        v-if="isLoading"
+        compact
+        :label="t('common.loading')"
+      />
       <div
         v-else-if="!items.length"
         class="rounded-xl border border-dashed p-8 text-center text-muted-foreground"

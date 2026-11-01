@@ -2,6 +2,7 @@
 import { onMounted, reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { getErrorMessage, showRequestFailed, showSuccess } from '@/common'
+import PageLoading from '@/components/shared/PageLoading.vue'
 import SectionCard from '@/components/shared/SectionCard.vue'
 import LanguageSwitcher from '@/components/shared/LanguageSwitcher.vue'
 import { Button } from '@/components/ui/button'
@@ -60,7 +61,11 @@ onMounted(() => {
       :title="t('settings.title')"
       :description="t('settings.description')"
     >
-      <div v-if="isLoading" class="text-sm text-muted-foreground">{{ t('common.loading') }}</div>
+      <PageLoading
+        v-if="isLoading"
+        compact
+        :label="t('common.loading')"
+      />
       <div v-else class="grid gap-3 sm:grid-cols-2">
         <div class="space-y-2">
           <label class="text-sm font-medium">{{ t('settings.shopCodeLabel') }}</label>

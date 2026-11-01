@@ -37,13 +37,33 @@ const untilDate = computed(() => {
   return Number.isNaN(date.getTime()) ? null : date
 })
 
-const untilLabel = computed(() => {
+const untilTimeLabel = computed(() => {
   if (!untilDate.value) return null
   return untilDate.value.toLocaleTimeString('vi-VN', {
     hour: '2-digit',
     minute: '2-digit',
     hour12: false,
   })
+})
+
+const untilWeekdayLabel = computed(() => {
+  if (!untilDate.value) return null
+  return untilDate.value.toLocaleDateString('vi-VN', { weekday: 'long' })
+})
+
+const untilDay = computed(() => {
+  if (!untilDate.value) return null
+  return String(untilDate.value.getDate()).padStart(2, '0')
+})
+
+const untilMonth = computed(() => {
+  if (!untilDate.value) return null
+  return String(untilDate.value.getMonth() + 1).padStart(2, '0')
+})
+
+const untilYear = computed(() => {
+  if (!untilDate.value) return null
+  return String(untilDate.value.getFullYear())
 })
 
 const remainingMs = computed(() => {
@@ -144,7 +164,7 @@ onUnmounted(() => {
         </div>
 
         <div
-          v-if="untilLabel"
+          v-if="untilTimeLabel"
           class="border-t border-slate-200 bg-slate-50 px-6 py-7 sm:px-8"
         >
           <div class="space-y-1 text-center">
@@ -156,11 +176,27 @@ onUnmounted(() => {
               {{ notice.until }}
             </p>
           </div>
-          <p class="mt-4 text-center text-4xl font-semibold tabular-nums tracking-tight text-[#a3007e] sm:text-5xl">
-            {{ untilLabel }}
-          </p>
 
-          <div v-if="countdownLabel" class="mt-5 border-t border-slate-200/80 pt-5">
+          <div class="mt-5 text-center">
+            <p class="text-sm font-medium capitalize text-slate-500">
+              {{ untilWeekdayLabel }}
+            </p>
+            <p
+              class="mt-2 flex flex-wrap items-baseline justify-center gap-x-3 gap-y-1 text-[1.75rem] font-semibold tabular-nums tracking-tight text-[#a3007e] sm:text-4xl"
+            >
+              <span>
+                <span>{{ untilDay }}</span>
+                <span class="mx-1 text-[#a3007e]/40">/</span>
+                <span>{{ untilMonth }}</span>
+                <span class="mx-1 text-[#a3007e]/40">/</span>
+                <span>{{ untilYear }}</span>
+              </span>
+              <span class="text-slate-300" aria-hidden="true">·</span>
+              <span>{{ untilTimeLabel }}</span>
+            </p>
+          </div>
+
+          <div v-if="countdownLabel" class="mt-6 border-t border-slate-200/80 pt-5">
             <div class="space-y-0.5 text-center">
               <p
                 v-for="(notice, index) in notices"
@@ -170,7 +206,7 @@ onUnmounted(() => {
                 {{ notice.remaining }}
               </p>
             </div>
-            <p class="mt-2 text-center font-mono text-2xl font-semibold tabular-nums tracking-wider text-slate-800 sm:text-3xl">
+            <p class="mt-3 text-center font-mono text-2xl font-semibold tabular-nums tracking-[0.2em] text-slate-800 sm:text-3xl">
               {{ countdownLabel }}
             </p>
           </div>

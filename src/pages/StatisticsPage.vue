@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n'
 import { PAGE_LABELS } from '@/common/constants/messages'
 import { showError } from '@/common/utils/toast'
 import { useFormatCurrency } from '@/common/utils/format'
+import PageLoading from '@/components/shared/PageLoading.vue'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -68,9 +69,11 @@ onMounted(() => {
         <CardDescription>{{ labels.description }}</CardDescription>
       </CardHeader>
       <CardContent>
-        <div v-if="statisticsStore.isLoading" class="text-muted-foreground">
-          {{ t('common.loading') }}
-        </div>
+        <PageLoading
+          v-if="statisticsStore.isLoading"
+          compact
+          :label="t('common.loading')"
+        />
 
         <div
           v-else-if="statisticsStore.loadFailed"

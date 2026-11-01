@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
-import { AlertTriangle, ExternalLink, Info, Loader2, Pencil, RefreshCw, Upload } from 'lucide-vue-next'
+import { AlertTriangle, ExternalLink, Loader2, Pencil, RefreshCw, Upload } from 'lucide-vue-next'
+import logoUrl from '@/assets/logo.png'
 import { useI18n } from 'vue-i18n'
 import {
   formatDisplayTime,
@@ -11,6 +12,7 @@ import {
 } from '@/common'
 import { PAGE_LABELS } from '@/common/constants/messages'
 import { getErrorMessage } from '@/common/utils/error'
+import PageLoading from '@/components/shared/PageLoading.vue'
 import ProgressBar from '@/components/shared/ProgressBar.vue'
 import SectionCard from '@/components/shared/SectionCard.vue'
 import StatusBadge from '@/components/shared/StatusBadge.vue'
@@ -55,6 +57,18 @@ const remaining = computed(() => {
 const hasWrongCodes = computed(() => {
   return (challengeStore.today?.wrong ?? 0) > 0
 })
+
+const isResubmitting = computed(() =>
+  Object.values(editingAnswers).some((item) => item.loading),
+)
+
+const isSubmitBusy = computed(() => isUploading.value || isResubmitting.value)
+
+const submitBusyLabel = computed(() =>
+  isUploading.value
+    ? t('transactions.uploadingDesktop')
+    : t('transactions.resubmitting'),
+)
 
 async function loadChallenge() {
   try {
@@ -177,10 +191,22 @@ async function navigateToOrder(code: string) {
 </script>
 
 <template>
-  <div class="space-y-5">
-    <div v-if="challengeStore.isLoading" class="text-center text-muted-foreground">
-      {{ t('common.loading') }}
-    </div>
+  <div class="relative space-y-5">
+    <Teleport to="body">
+      <div
+        v-if="isSubmitBusy"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/35 px-4 backdrop-blur-sm"
+        role="status"
+        aria-live="polite"
+      >
+        <PageLoading
+          compact
+          :label="submitBusyLabel"
+        />
+      </div>
+    </Teleport>
+
+    <PageLoading v-if="challengeStore.isLoading" />
 
     <div
       v-else-if="challengeStore.loadFailed"
@@ -208,20 +234,30 @@ async function navigateToOrder(code: string) {
           </p>
         </div>
 
-        <div class="mt-5 grid grid-cols-3 gap-3">
-          <div class="rounded-xl border bg-muted/40 p-3 text-center">
-            <p class="text-sm text-muted-foreground">{{ t('transactions.totalNeeded') }}</p>
-            <p class="mt-1 text-3xl font-bold">{{ challengeStore.today.totalCodes }}</p>
+        <div class="mt-5 grid grid-cols-3 items-stretch gap-2 sm:gap-3">
+          <div class="flex min-h-[5.75rem] flex-col rounded-xl border bg-muted/40 p-2.5 text-center sm:min-h-0 sm:p-3">
+            <p class="min-h-8 text-[11px] leading-tight text-muted-foreground sm:min-h-0 sm:text-sm">
+              {{ t('transactions.totalNeeded') }}
+            </p>
+            <p class="mt-auto pt-1 text-2xl font-bold tabular-nums sm:text-3xl">
+              {{ challengeStore.today.totalCodes }}
+            </p>
           </div>
-          <div class="rounded-xl border border-sky-200 bg-sky-50 p-3 text-center">
-            <p class="text-sm text-sky-700">{{ t('transactions.uploaded') }}</p>
-            <p class="mt-1 text-3xl font-bold text-sky-800">
+          <div class="flex min-h-[5.75rem] flex-col rounded-xl border border-sky-200 bg-sky-50 p-2.5 text-center sm:min-h-0 sm:p-3">
+            <p class="min-h-8 text-[11px] leading-tight text-sky-700 sm:min-h-0 sm:text-sm">
+              {{ t('transactions.uploaded') }}
+            </p>
+            <p class="mt-auto pt-1 text-2xl font-bold tabular-nums text-sky-800 sm:text-3xl">
               {{ challengeStore.today.correct }}
             </p>
           </div>
-          <div class="rounded-xl border bg-muted/40 p-3 text-center">
-            <p class="text-sm text-muted-foreground">{{ t('transactions.remaining') }}</p>
-            <p class="mt-1 text-3xl font-bold">{{ remaining }}</p>
+          <div class="flex min-h-[5.75rem] flex-col rounded-xl border bg-muted/40 p-2.5 text-center sm:min-h-0 sm:p-3">
+            <p class="min-h-8 text-[11px] leading-tight text-muted-foreground sm:min-h-0 sm:text-sm">
+              {{ t('transactions.remaining') }}
+            </p>
+            <p class="mt-auto pt-1 text-2xl font-bold tabular-nums sm:text-3xl">
+              {{ remaining }}
+            </p>
           </div>
         </div>
 
@@ -245,7 +281,7 @@ async function navigateToOrder(code: string) {
             rows="2"
             :placeholder="t('transactions.codePlaceholder')"
             :disabled="isUploading"
-            class="min-h-16 min-w-0 flex-1 rounded-xl border-2 border-sky-300 bg-sky-50/40 px-3 py-3 font-mono text-lg uppercase tracking-wide shadow-sm outline-none transition-colors focus-visible:border-sky-500 focus-visible:ring-2 focus-visible:ring-sky-200/80 disabled:cursor-not-allowed disabled:border-input disabled:bg-muted disabled:opacity-60 sm:w-full"
+            class="min-h-16 min-w-0 flex-1 rounded-xl border-2 border-sky-300 bg-sky-50/60 px-3 py-3 font-mono text-lg uppercase tracking-wide shadow-sm outline-none transition-colors focus-visible:border-sky-500 focus-visible:ring-2 focus-visible:ring-sky-500/20 disabled:cursor-not-allowed disabled:border-input disabled:bg-muted disabled:opacity-60 sm:w-full"
           />
 
           <Button
@@ -290,9 +326,11 @@ async function navigateToOrder(code: string) {
         :title="t('transactions.uploadedListTitle')"
         :description="t('transactions.uploadedListDescription', { correct: challengeStore.today.correct, wrong: challengeStore.today.wrong })"
       >
-        <div v-if="challengeStore.isLoadingResult" class="text-muted-foreground">
-          {{ t('transactions.loadingResult') }}
-        </div>
+        <PageLoading
+          v-if="challengeStore.isLoadingResult"
+          compact
+          :label="t('transactions.loadingResult')"
+        />
 
         <div
           v-else-if="!challengeStore.todayResult?.answers.length"
@@ -308,7 +346,7 @@ async function navigateToOrder(code: string) {
             :class="[
               'rounded-xl border px-4 py-3 transition-colors',
               answer.isCorrect
-                ? 'cursor-pointer border-transparent hover:border-primary/40 hover:bg-primary/5'
+                ? 'cursor-pointer border-transparent hover:border-sky-300 hover:bg-sky-50/60'
                 : 'border-rose-200 bg-rose-50/50',
             ]"
             @click="answer.isCorrect && navigateToOrder(answer.inputCode)"
@@ -333,7 +371,7 @@ async function navigateToOrder(code: string) {
               <div class="min-w-0 flex-1">
                 <div class="flex items-start justify-between gap-2">
                   <p class="text-lg font-semibold leading-snug">
-                    <span class="mr-1.5 tabular-nums text-sky-600">{{ answer.order }}.</span>{{ answer.orderPreview?.customerName || t('transactions.received') }}
+                    <span class="mr-1.5 tabular-nums text-sky-700">{{ answer.order }}.</span>{{ answer.orderPreview?.customerName || t('transactions.received') }}
                   </p>
                   <p v-if="answer.orderPreview?.amount != null" class="shrink-0 text-lg font-bold">
                     {{ formatYen(answer.orderPreview.amount) }}
@@ -367,7 +405,7 @@ async function navigateToOrder(code: string) {
               </div>
               <Loader2
                 v-if="navigatingCode === answer.inputCode"
-                class="size-5 shrink-0 animate-spin text-primary"
+                class="size-5 shrink-0 animate-spin text-sky-600"
               />
               <ExternalLink v-else class="size-4 shrink-0 text-muted-foreground" />
             </div>
@@ -404,7 +442,7 @@ async function navigateToOrder(code: string) {
               <input
                 v-model="editingAnswers[answer.order].code"
                 type="text"
-                class="min-w-0 flex-1 rounded-lg border-2 border-sky-300 bg-sky-50/40 px-2.5 py-1.5 font-mono text-sm uppercase tracking-widest outline-none transition-colors focus-visible:border-sky-500 focus-visible:ring-2 focus-visible:ring-sky-200/80"
+                class="min-w-0 flex-1 rounded-lg border-2 border-sky-300 bg-sky-50/60 px-2.5 py-1.5 font-mono text-sm uppercase tracking-widest outline-none transition-colors focus-visible:border-sky-500 focus-visible:ring-2 focus-visible:ring-sky-500/20"
                 :disabled="editingAnswers[answer.order].loading"
                 @keyup.enter="handleResubmitFromList(answer.order)"
                 @keyup.escape="cancelEditAnswer(answer.order)"
@@ -412,7 +450,7 @@ async function navigateToOrder(code: string) {
               <Button
                 size="sm"
                 variant="outline"
-                class="shrink-0 gap-1 border-primary bg-primary/5 text-xs text-primary hover:bg-primary/10"
+                class="shrink-0 gap-1 border-sky-300 bg-sky-50 text-xs text-sky-700 hover:bg-sky-100"
                 :disabled="!editingAnswers[answer.order].code.trim() || editingAnswers[answer.order].loading"
                 @click.stop="handleResubmitFromList(answer.order)"
               >
@@ -434,48 +472,69 @@ async function navigateToOrder(code: string) {
   </div>
 
   <Dialog v-model:open="showCompletedDialog">
-    <DialogContent class="sm:max-w-md">
-      <DialogHeader class="items-center text-center">
-        <div class="mx-auto mb-3 flex size-16 items-center justify-center rounded-full bg-sky-100">
-          <Info class="size-8 text-sky-600" />
-        </div>
-        <DialogTitle class="text-xl">
-          {{ t('transactions.completedDialogTitle') }}
-        </DialogTitle>
-        <DialogDescription>
-          {{ t('transactions.completedDialogDescription', { name: authStore.user?.name || '' }) }}
-        </DialogDescription>
-      </DialogHeader>
+    <DialogContent class="overflow-hidden border-slate-200 p-0 sm:max-w-md">
+      <div class="h-1 w-full bg-[#a3007e]" />
 
-      <div v-if="challengeStore.today" class="grid grid-cols-3 gap-3 py-4">
-        <div class="rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-center">
-          <p class="text-xs text-emerald-600">{{ t('transactions.uploaded') }}</p>
-          <p class="mt-1 text-xl font-bold text-emerald-700">{{ challengeStore.today.submitted }}</p>
-        </div>
-        <div class="rounded-xl border border-sky-200 bg-sky-50 p-3 text-center">
-          <p class="text-xs text-sky-600">{{ t('transactions.correctLabel') }}</p>
-          <p class="mt-1 text-xl font-bold text-sky-700">{{ challengeStore.today.correct }}</p>
-        </div>
-        <div class="rounded-xl border border-rose-200 bg-rose-50 p-3 text-center">
-          <p class="text-xs text-rose-600">{{ t('transactions.wrongLabel') }}</p>
-          <p class="mt-1 text-xl font-bold text-rose-700">{{ challengeStore.today.wrong }}</p>
-        </div>
-      </div>
+      <div class="px-6 pb-6 pt-7 sm:px-8">
+        <DialogHeader class="items-center space-y-0 text-center">
+          <img
+            :src="logoUrl"
+            alt="RKKCS"
+            class="mx-auto h-16 w-auto max-w-[220px] object-contain sm:h-20 sm:max-w-[260px]"
+          />
+          <DialogTitle class="mt-6 text-xl font-semibold tracking-tight text-slate-900">
+            {{ t('transactions.completedDialogTitle') }}
+          </DialogTitle>
+          <DialogDescription class="mt-2 text-sm leading-6 text-slate-500">
+            {{ t('transactions.completedDialogDescription', { name: authStore.user?.name || '' }) }}
+          </DialogDescription>
+        </DialogHeader>
 
-      <DialogFooter class="flex-col gap-2 sm:flex-col">
-        <Button class="w-full" @click="showCompletedDialog = false">
-          {{ t('transactions.completedDialogStay') }}
-        </Button>
-        <Button
-          variant="outline"
-          class="w-full"
-          as-child
+        <div
+          v-if="challengeStore.today"
+          class="mt-6 divide-y divide-slate-100 border-y border-slate-100"
         >
-          <RouterLink :to="{ name: 'history' }" @click="showCompletedDialog = false">
-            {{ t('transactions.completedDialogHistory') }}
-          </RouterLink>
-        </Button>
-      </DialogFooter>
+          <div class="flex items-center justify-between py-3.5">
+            <span class="text-sm text-slate-500">
+              {{ t('transactions.completedDialogSubmitted') }}
+            </span>
+            <span class="text-base font-semibold tabular-nums text-slate-900">
+              {{ challengeStore.today.submitted }}
+            </span>
+          </div>
+          <div class="flex items-center justify-between py-3.5">
+            <span class="text-sm text-slate-500">
+              {{ t('transactions.completedDialogCorrect') }}
+            </span>
+            <span class="text-base font-semibold tabular-nums text-slate-900">
+              {{ challengeStore.today.correct }}
+            </span>
+          </div>
+          <div class="flex items-center justify-between py-3.5">
+            <span class="text-sm text-slate-500">
+              {{ t('transactions.completedDialogWrong') }}
+            </span>
+            <span class="text-base font-semibold tabular-nums text-slate-900">
+              {{ challengeStore.today.wrong }}
+            </span>
+          </div>
+        </div>
+
+        <DialogFooter class="mt-6 flex-col gap-2 sm:flex-col">
+          <Button class="h-11 w-full bg-[#a3007e] hover:bg-[#8a006a]" @click="showCompletedDialog = false">
+            {{ t('transactions.completedDialogStay') }}
+          </Button>
+          <Button
+            variant="ghost"
+            class="h-11 w-full text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+            as-child
+          >
+            <RouterLink :to="{ name: 'history' }" @click="showCompletedDialog = false">
+              {{ t('transactions.completedDialogHistory') }}
+            </RouterLink>
+          </Button>
+        </DialogFooter>
+      </div>
     </DialogContent>
   </Dialog>
 </template>

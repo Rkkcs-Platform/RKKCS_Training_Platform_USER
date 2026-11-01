@@ -114,9 +114,12 @@
 
   --popover-foreground: oklch(0.145 0 0);
 
-  --primary: oklch(0.488 0.2 264);
+  /* RKKCS brand magenta */
+  --primary: #a3007e;
 
-  --primary-foreground: oklch(0.985 0 0);
+  --primary-foreground: #ffffff;
+
+  --ring: color-mix(in oklab, #a3007e 45%, white);
 
   --secondary: oklch(0.97 0 0);
 
@@ -135,8 +138,6 @@
   --border: oklch(0.922 0 0);
 
   --input: oklch(0.922 0 0);
-
-  --ring: oklch(0.708 0 0);
 
   --chart-1: oklch(0.87 0 0);
 
@@ -181,9 +182,11 @@
 
   --popover-foreground: oklch(0.985 0 0);
 
-  --primary: oklch(0.922 0 0);
+  --primary: #c43a9a;
 
-  --primary-foreground: oklch(0.205 0 0);
+  --primary-foreground: #ffffff;
+
+  --ring: color-mix(in oklab, #c43a9a 50%, black);
 
   --secondary: oklch(0.269 0 0);
 
@@ -202,8 +205,6 @@
   --border: oklch(1 0 0 / 10%);
 
   --input: oklch(1 0 0 / 15%);
-
-  --ring: oklch(0.556 0 0);
 
   --chart-1: oklch(0.87 0 0);
 
