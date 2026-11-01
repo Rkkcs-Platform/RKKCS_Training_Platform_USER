@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
 import { formatDisplayDate, showRequestFailed } from '@/common'
 import { useFormatCurrency } from '@/common/utils/format'
+import PageLoading from '@/components/shared/PageLoading.vue'
 import { Card, CardContent } from '@/components/ui/card'
 import { fetchCustomers } from '@/services/order.service'
 import type { CustomerListItem } from '@/types/order'
@@ -29,9 +30,10 @@ onMounted(async () => {
 
 <template>
   <div class="space-y-5">
-    <div v-if="isLoading" class="text-muted-foreground">
-      {{ t('customers.loadingCustomers') }}
-    </div>
+    <PageLoading
+      v-if="isLoading"
+      :label="t('customers.loadingCustomers')"
+    />
 
     <template v-else>
       <div class="space-y-3">

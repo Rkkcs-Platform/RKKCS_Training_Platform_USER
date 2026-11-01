@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { formatDisplayDate, showRequestFailed } from '@/common'
 import { useFormatCurrency } from '@/common/utils/format'
+import PageLoading from '@/components/shared/PageLoading.vue'
 import SectionCard from '@/components/shared/SectionCard.vue'
 import StatusBadge from '@/components/shared/StatusBadge.vue'
 import { Button } from '@/components/ui/button'
@@ -43,9 +44,10 @@ watch(
 </script>
 
 <template>
-  <div v-if="isLoading" class="text-muted-foreground">
-    {{ t('customers.loadingDetail') }}
-  </div>
+  <PageLoading
+    v-if="isLoading"
+    :label="t('customers.loadingDetail')"
+  />
 
   <div v-else-if="detail" class="space-y-5">
     <div>

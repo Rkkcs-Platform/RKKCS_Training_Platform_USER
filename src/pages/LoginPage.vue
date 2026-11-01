@@ -20,6 +20,7 @@ import {
 import { Input } from '@/components/ui/input'
 import LanguageSwitcher from '@/components/shared/LanguageSwitcher.vue'
 import { useAuthStore } from '@/stores/auth'
+import logoUrl from '@/assets/logo.png'
 
 const authStore = useAuthStore()
 const router = useRouter()
@@ -70,10 +71,12 @@ async function handleSubmit() {
       </div>
 
       <div class="text-center">
-        <p class="text-xs font-medium uppercase tracking-[0.25em] text-primary">
-          {{ APP_LABELS.brandShort }}
-        </p>
-        <h1 class="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">
+        <img
+          :src="logoUrl"
+          alt="RKKCS"
+          class="mx-auto h-14 w-auto max-w-[220px] object-contain sm:h-16"
+        />
+        <h1 class="mt-4 text-2xl font-bold tracking-tight sm:text-3xl">
           {{ APP_LABELS.appName }}
         </h1>
         <p class="mt-2 text-sm text-muted-foreground sm:text-base">

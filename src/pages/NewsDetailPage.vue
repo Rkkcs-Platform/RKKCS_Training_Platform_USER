@@ -3,6 +3,7 @@ import { onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { getErrorMessage, showRequestFailed } from '@/common'
+import PageLoading from '@/components/shared/PageLoading.vue'
 import SectionCard from '@/components/shared/SectionCard.vue'
 import { Button } from '@/components/ui/button'
 import { fetchNewsBySlug, type NewsItem } from '@/services/phase5.service'
@@ -53,7 +54,11 @@ onMounted(() => {
       :title="item?.title || t('news.detailTitle')"
       :description="item ? formatDate(item.publishedAt || item.createdAt) : ''"
     >
-      <div v-if="isLoading" class="text-sm text-muted-foreground">{{ t('common.loading') }}</div>
+      <PageLoading
+        v-if="isLoading"
+        compact
+        :label="t('common.loading')"
+      />
       <div v-else-if="item" class="space-y-4">
         <p class="text-muted-foreground">{{ item.summary }}</p>
         <div class="whitespace-pre-wrap text-sm leading-relaxed">

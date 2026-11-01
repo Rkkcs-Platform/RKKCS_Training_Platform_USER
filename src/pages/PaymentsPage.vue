@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
 import { formatDisplayDate, showRequestFailed } from '@/common'
 import { useFormatCurrency } from '@/common/utils/format'
+import PageLoading from '@/components/shared/PageLoading.vue'
 import StatusBadge from '@/components/shared/StatusBadge.vue'
 import { Card, CardContent } from '@/components/ui/card'
 import { fetchPayments } from '@/services/order.service'
@@ -30,9 +31,10 @@ onMounted(async () => {
 
 <template>
   <div class="space-y-5">
-    <div v-if="isLoading" class="text-muted-foreground">
-      {{ t('payments.loadingPayments') }}
-    </div>
+    <PageLoading
+      v-if="isLoading"
+      :label="t('payments.loadingPayments')"
+    />
 
     <template v-else>
       <div class="space-y-3">

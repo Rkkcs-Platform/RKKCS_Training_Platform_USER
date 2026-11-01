@@ -5,6 +5,7 @@ import { RouterLink } from 'vue-router'
 import { showRequestFailed } from '@/common'
 import { useFormatCurrency } from '@/common/utils/format'
 import KpiCard from '@/components/shared/KpiCard.vue'
+import PageLoading from '@/components/shared/PageLoading.vue'
 import SectionCard from '@/components/shared/SectionCard.vue'
 import StatusBadge from '@/components/shared/StatusBadge.vue'
 import { Button } from '@/components/ui/button'
@@ -47,9 +48,10 @@ onMounted(async () => {
 
 <template>
   <div class="space-y-5">
-    <div v-if="isLoading" class="text-muted-foreground">
-      {{ t('dashboard.loadingDashboard') }}
-    </div>
+    <PageLoading
+      v-if="isLoading"
+      :label="t('dashboard.loadingDashboard')"
+    />
 
     <template v-else-if="data">
       <div class="grid grid-cols-2 gap-3 lg:grid-cols-4">
@@ -125,9 +127,11 @@ onMounted(async () => {
           </Button>
         </SectionCard>
       </div>
+
     </template>
 
     <SectionCard
+      v-if="!isLoading"
       :title="t('dashboard.startCodeTitle')"
       :description="t('dashboard.startCodeDescription')"
     >
