@@ -396,7 +396,7 @@ async function navigateToOrder(code: string) {
                   {{ answer.orderPreview.deliveryAddress }}
                 </p>
                 <p class="mt-1 text-sm text-muted-foreground">
-                  <span v-if="answer.orderPreview?.carrier && answer.orderPreview.carrier !== 'RKKCS Express'">{{ answer.orderPreview.carrier }} · </span>
+                  <span v-if="answer.orderPreview?.carrier && !/^rkk csj express$/i.test(answer.orderPreview.carrier)">{{ answer.orderPreview.carrier }} · </span>
                   {{ formatDisplayTime(answer.submittedAt) }}
                 </p>
                 <p class="mt-1 font-mono text-xs tracking-widest text-muted-foreground">
@@ -479,7 +479,7 @@ async function navigateToOrder(code: string) {
         <DialogHeader class="items-center space-y-0 text-center">
           <img
             :src="logoUrl"
-            alt="RKKCS"
+            alt="RKK CSJ"
             class="mx-auto h-16 w-auto max-w-[220px] object-contain sm:h-20 sm:max-w-[260px]"
           />
           <DialogTitle class="mt-6 text-xl font-semibold tracking-tight text-slate-900">

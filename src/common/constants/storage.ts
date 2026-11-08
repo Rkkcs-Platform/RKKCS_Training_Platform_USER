@@ -1,5 +1,5 @@
 export const STORAGE_KEYS = {
-  accessToken: 'rkkcs_access_token',
-  refreshToken: 'rkkcs_refresh_token',
-  user: 'rkkcs_user',
+  accessToken: 'rkk_csj_access_token',
+  refreshToken: 'rkk_csj_refresh_token',
+  user: 'rkk_csj_user',
 } as const

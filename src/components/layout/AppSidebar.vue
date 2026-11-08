@@ -68,7 +68,7 @@ function handleNavigate() {
     <div class="border-b px-5 py-4">
       <img
         :src="logoUrl"
-        alt="RKKCS"
+        alt="RKK CSJ"
         class="h-10 w-auto max-w-[180px] object-contain"
       />
       <p class="mt-2 text-xs text-muted-foreground">{{ APP_LABELS.appName }}</p>

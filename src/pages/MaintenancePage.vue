@@ -91,7 +91,7 @@ async function fetchMaintenanceStatus() {
     until?: string | null
   }
 
-  if (data.language && !sessionStorage.getItem('rkkcs-lang-initialized')) {
+  if (data.language && !sessionStorage.getItem('rkk-csj-lang-initialized')) {
     setLocale(data.language as AppLocale)
   }
 
@@ -140,7 +140,7 @@ onUnmounted(() => {
         <div class="flex flex-col items-center border-b border-slate-100 bg-white px-6 pb-6 pt-8 sm:px-8 sm:pb-8 sm:pt-10">
           <img
             :src="logoUrl"
-            alt="RKKCS — 期待を超える 未来を創る"
+            alt="RKK CSJ"
             class="h-20 w-auto max-w-[min(100%,280px)] object-contain sm:h-24 sm:max-w-[320px]"
           />
           <p class="mt-5 text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400">
