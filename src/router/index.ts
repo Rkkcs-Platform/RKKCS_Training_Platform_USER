@@ -137,7 +137,7 @@ router.beforeEach(async (to) => {
         `${import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1'}/setting/maintenance`,
       )
       const data = await res.json()
-      if (data.language && !sessionStorage.getItem('rkkcs-lang-initialized')) {
+      if (data.language && !sessionStorage.getItem('rkk-csj-lang-initialized')) {
         setLocale(data.language as AppLocale)
       }
       if (data.maintenance) {
@@ -155,7 +155,7 @@ router.beforeEach(async (to) => {
         `${import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1'}/setting/maintenance`,
       )
       const data = await res.json()
-      if (data.language && !sessionStorage.getItem('rkkcs-lang-initialized')) {
+      if (data.language && !sessionStorage.getItem('rkk-csj-lang-initialized')) {
         setLocale(data.language as AppLocale)
       }
       if (!data.maintenance) {

@@ -334,8 +334,8 @@ export default {
   },
 
   app: {
-    appName: 'RKKCS Operations Platform',
-    brandShort: 'RKKCS',
+    appName: 'RKK CSJ Operations Platform',
+    brandShort: 'RKK CSJ',
   },
 
   language: {
@@ -378,7 +378,7 @@ export default {
       'The system is being updated. Please return after the estimated time below.',
     estimatedReturn: 'Estimated return to service',
     retry: 'Check again',
-    brand: 'RKKCS Operations Platform',
+    brand: 'RKK CSJ Operations Platform',
     notice: 'System notice',
   },
 }

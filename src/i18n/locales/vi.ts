@@ -334,8 +334,8 @@ export default {
   },
 
   app: {
-    appName: 'RKKCS Operations Platform',
-    brandShort: 'RKKCS',
+    appName: 'RKK CSJ Operations Platform',
+    brandShort: 'RKK CSJ',
   },
 
   language: {
@@ -378,7 +378,7 @@ export default {
       'Hệ thống đang được cập nhật. Vui lòng quay trở lại sau thời gian dự kiến bên dưới.',
     estimatedReturn: 'Thời gian dự kiến hoạt động trở lại',
     retry: 'Kiểm tra lại',
-    brand: 'RKKCS Operations Platform',
+    brand: 'RKK CSJ Operations Platform',
     notice: 'Thông báo hệ thống',
   },
 }

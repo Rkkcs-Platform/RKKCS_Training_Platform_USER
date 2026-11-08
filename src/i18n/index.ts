@@ -3,7 +3,7 @@ import en from './locales/en'
 import ja from './locales/ja'
 import vi from './locales/vi'
 
-const STORAGE_KEY = 'rkkcs-locale'
+const STORAGE_KEY = 'rkk-csj-locale'
 
 function getSavedLocale(): string {
   try {
@@ -32,7 +32,7 @@ export function setLocale(locale: AppLocale) {
   i18n.global.locale.value = locale
   try {
     localStorage.setItem(STORAGE_KEY, locale)
-    sessionStorage.setItem('rkkcs-lang-initialized', 'true')
+    sessionStorage.setItem('rkk-csj-lang-initialized', 'true')
   } catch {
     // storage unavailable
   }

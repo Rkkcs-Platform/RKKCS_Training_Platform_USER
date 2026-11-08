@@ -334,8 +334,8 @@ export default {
   },
 
   app: {
-    appName: 'RKKCS Operations Platform',
-    brandShort: 'RKKCS',
+    appName: 'RKK CSJ Operations Platform',
+    brandShort: 'RKK CSJ',
   },
 
   language: {
@@ -378,7 +378,7 @@ export default {
       'システム更新のため現在ご利用いただけません。下記の予定時刻以降に再度アクセスしてください。',
     estimatedReturn: '再開予定時刻',
     retry: '再度確認する',
-    brand: 'RKKCS Operations Platform',
+    brand: 'RKK CSJ Operations Platform',
     notice: 'システム通知',
   },
 }

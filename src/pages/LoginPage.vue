@@ -73,7 +73,7 @@ async function handleSubmit() {
       <div class="text-center">
         <img
           :src="logoUrl"
-          alt="RKKCS"
+          alt="RKK CSJ"
           class="mx-auto h-14 w-auto max-w-[220px] object-contain sm:h-16"
         />
         <h1 class="mt-4 text-2xl font-bold tracking-tight sm:text-3xl">
